@@ -30,6 +30,27 @@ class CacheRoundTripTest extends TestCase
         Cache::clear();
     }
 
+    /**
+     * The file store writes real files; do not leave them in the project.
+     */
+    protected function tearDown(): void
+    {
+        $path = storage_path('framework/testing-cache');
+
+        if (is_dir($path)) {
+            $it = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ($it as $f) {
+                $f->isDir() ? @rmdir($f->getPathname()) : @unlink($f->getPathname());
+            }
+            @rmdir($path);
+        }
+
+        parent::tearDown();
+    }
+
     public function test_an_array_survives_the_cache(): void
     {
         $this->useSerializingCache();

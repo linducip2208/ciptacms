@@ -43,10 +43,38 @@ class CorruptCacheTest extends TestCase
         );
     }
 
+    /**
+     * The file store serializes, so it reproduces the decode failure without
+     * depending on a cache table.
+     */
     protected function useDatabaseCache(): void
     {
-        config(['cache.default' => 'database']);
+        config([
+            'cache.default' => 'file',
+            'cache.stores.file.path' => storage_path('framework/testing-cache'),
+        ]);
         Cache::clear();
+    }
+
+    /**
+     * The file store writes real files; do not leave them in the project.
+     */
+    protected function tearDown(): void
+    {
+        $path = storage_path('framework/testing-cache');
+
+        if (is_dir($path)) {
+            $it = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ($it as $f) {
+                $f->isDir() ? @rmdir($f->getPathname()) : @unlink($f->getPathname());
+            }
+            @rmdir($path);
+        }
+
+        parent::tearDown();
     }
 
     public function test_settings_survive_a_corrupt_cache_entry(): void

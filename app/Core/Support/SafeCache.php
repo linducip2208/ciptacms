@@ -47,9 +47,34 @@ class SafeCache
         $value = $callback();
 
         try {
-            Cache::put($key, $value, $seconds);
+            Cache::put($key, self::normalise($value), $seconds);
         } catch (Throwable $e) {
             report($e);
+        }
+
+        return $value;
+    }
+
+    /**
+     * Never hand a serializing cache store an object.
+     *
+     * A Collection written to the database or file store comes back as
+     * __PHP_Incomplete_Class, and the first method call on it fatals with
+     * "tried to call a method on an incomplete object". Flatten anything
+     * array-like to a plain array, which serializes without a class.
+     */
+    public static function normalise(mixed $value): mixed
+    {
+        if ($value instanceof \Illuminate\Support\Collection) {
+            return $value->all();
+        }
+
+        if ($value instanceof \Illuminate\Contracts\Support\Arrayable) {
+            return $value->toArray();
+        }
+
+        if (is_object($value) && method_exists($value, '__toString')) {
+            return (string) $value;
         }
 
         return $value;
