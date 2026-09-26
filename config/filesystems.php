@@ -15,6 +15,8 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
+    'cdn_url' => env('MEDIA_CDN_URL', ''),
+
     /*
     |--------------------------------------------------------------------------
     | Filesystem Disks

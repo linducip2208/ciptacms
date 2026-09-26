@@ -20,6 +20,10 @@ class SecurityController extends AdminController {
         $r->user()->update(['two_factor_enabled'=>false,'two_factor_secret'=>null,'two_factor_backup_codes'=>null]);
         return back()->with('ok','2FA dimatikan');
     }
+    public function twoFactorRegen(Request $r, TwoFactorService $tfa){
+        $r->user()->update(['two_factor_backup_codes'=>$tfa->backupCodes()]);
+        return back()->with('ok','Backup codes baru dibuat');
+    }
     public function sessions(Request $r){
         $rows=\Illuminate\Support\Facades\DB::table('sessions')->where('user_id',$r->user()->id)->orderByDesc('last_activity')->get();
         $hist=\App\Models\LoginHistory::where('user_id',$r->user()->id)->latest()->limit(20)->get();

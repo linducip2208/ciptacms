@@ -23,6 +23,7 @@ class User extends Authenticatable
     }
     public function isActive(): bool { return (bool)$this->is_active && $this->status==='active'; }
     public function loginHistories(){ return $this->hasMany(LoginHistory::class); }
+    public function socialAccounts(){ return $this->hasMany(SocialAccount::class); }
     public function memberProfile(){ return $this->hasOne(MemberProfile::class); }
     public function vendor(){ return $this->hasOne(Vendor::class); }
 }

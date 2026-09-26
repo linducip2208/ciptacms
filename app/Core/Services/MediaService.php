@@ -84,8 +84,16 @@ class MediaService {
     }
     public function url(MediaFile $f, ?string $variant=null): string {
         $disk = Storage::disk($f->disk);
+        $rel = ($variant && isset($f->variants[$variant])) ? $f->variants[$variant] : $f->path;
+        // CDN prefix (S3/Cloudfront-ready): MEDIA_CDN_URL=https://cdn.example.com
+        if ($cdn=rtrim((string)config('filesystems.cdn_url', env('MEDIA_CDN_URL','')),'/')) {
+            if (!$disk->exists($rel) && $rel!==$f->path) $rel=$f->path;
+            return $cdn.'/'.ltrim($rel,'/');
+        }
         if ($variant && isset($f->variants[$variant]) && $disk->exists($f->variants[$variant])) return $disk->url($f->variants[$variant]);
-        return $disk->url($f->path);
+        // Private disk → signed temporary URL
+        try { if(in_array($f->disk,['s3','private'])) return $disk->temporaryUrl($rel, now()->addHour()); } catch(\Throwable $e){}
+        return $disk->url($rel);
     }
     public function srcset(MediaFile $f): string {
         $out=[];

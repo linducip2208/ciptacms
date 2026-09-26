@@ -2,7 +2,7 @@
 
 > **Read in:** [English](README.en.md) · [العربية](README.ar.md) · [Indonesia](README.id.md)
 
-**Lindu CMS** adalah platform CMS + aplikasi (POS, ERP, Hotel, LMS, Marketplace, SaaS, Jodohku, dsb) di atas **Laravel 13 + PHP 8.3 + MySQL/SQLite**. Core TIDAK PERNAH berisi logika bisnis spesifik — semua fitur aplikasi hidup sebagai **Modules**.
+**Lindu CMS** adalah platform CMS + aplikasi (POS, ERP, Hotel, LMS, Marketplace, SaaS, Jodohku, dsb) di atas **Laravel 13 + PHP 8.3 + MySQL/SQLite + Tabler Admin**. Core TIDAK PERNAH berisi logika bisnis spesifik — semua fitur aplikasi hidup sebagai **Modules**.
 
 ## Fitur Utama / Key Features / الميزات
 | ID | EN | AR |

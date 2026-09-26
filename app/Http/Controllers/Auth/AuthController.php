@@ -63,6 +63,22 @@ class AuthController extends Controller {
     public function showForgot(){ return view('auth.forgot'); }
     public function forgot(Request $r){ $r->validate(['email'=>'required|email']); Password::sendResetLink($r->only('email')); return back()->with('ok','Reset link sent if email exists'); }
     // Social login-ready: generic OAuth entry point (plug Socialite driver per provider)
-    public function socialRedirect(string $provider){ $allowed=explode(',',(string)setting('social.providers','google,github')); abort_unless(in_array($provider,$allowed),404); return redirect('/login')->withErrors(['email'=>"OAuth [$provider] belum dikonfigurasi. Isi SOCIAL_".strtoupper($provider)."_ID di .env"]); }
-    public function socialCallback(string $provider){ return redirect('/login'); }
+    public function socialRedirect(string $provider){
+        $allowed=['google','github'];
+        abort_unless(in_array($provider,$allowed),404);
+        try { return \Laravel\Socialite\Facades\Socialite::driver($provider)->redirect(); }
+        catch(\Throwable $e){ return redirect('/login')->withErrors(['email'=>"OAuth [$provider] belum dikonfigurasi. Isi ".strtoupper($provider)."_CLIENT_ID/SECRET di .env"]); }
+    }
+    public function socialCallback(string $provider){
+        try {
+            $su=\Laravel\Socialite\Facades\Socialite::driver($provider)->user();
+            $acc=\App\Models\SocialAccount::where('provider',$provider)->where('provider_id',$su->getId())->first();
+            if($acc){ Auth::login($acc->user, true); return redirect('/admin'); }
+            $user=User::where('email',$su->getEmail())->first();
+            if(!$user){ $user=User::create(['name'=>$su->getName()?:$su->getNickname()?:'User','email'=>$su->getEmail(),'password'=>bcrypt(\Illuminate\Support\Str::random(24)),'status'=>'active','is_active'=>true,'email_verified_at'=>now()]); }
+            $user->socialAccounts()->create(['provider'=>$provider,'provider_id'=>$su->getId(),'email'=>$su->getEmail(),'meta'=>['avatar'=>$su->getAvatar()]]);
+            Auth::login($user, true);
+            return redirect('/admin');
+        } catch(\Throwable $e){ return redirect('/login')->withErrors(['email'=>'OAuth gagal: '.$e->getMessage()]); }
+    }
 }

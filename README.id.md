@@ -2,7 +2,7 @@
 
 > Tersedia juga dalam [English](README.en.md) · [العربية](README.ar.md)
 
-Lindu CMS adalah fondasi CMS + aplikasi (Jodohku, POS, ERP, Hotel, LMS, Marketplace, SaaS, Company Profile) berbasis **Laravel 13 + PHP 8.3 + MySQL/SQLite**. **Core tidak boleh berisi logika bisnis spesifik** — semua fitur aplikasi ada di `modules/`.
+Lindu CMS adalah fondasi CMS + aplikasi (Jodohku, POS, ERP, Hotel, LMS, Marketplace, SaaS, Company Profile) berbasis **Laravel 13 + PHP 8.3 + MySQL/SQLite + Tabler Admin**. **Core tidak boleh berisi logika bisnis spesifik** — semua fitur aplikasi ada di `modules/`.
 
 ## Daftar Fitur
 ### 1. Core Engine

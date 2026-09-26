@@ -48,6 +48,7 @@ Route::prefix('admin')->middleware(['web','auth'])->name('admin.')->group(functi
     Route::get('/security/2fa', [SecurityController::class,'twoFactor'])->name('2fa');
     Route::post('/security/2fa/enable', [SecurityController::class,'twoFactorEnable'])->name('2fa.enable');
     Route::post('/security/2fa/disable', [SecurityController::class,'twoFactorDisable'])->name('2fa.disable');
+    Route::post('/security/2fa/regen', [SecurityController::class,'twoFactorRegen'])->name('2fa.regen');
     Route::get('/security/sessions', [SecurityController::class,'sessions'])->name('sessions');
     Route::delete('/security/sessions/{id}', [SecurityController::class,'revokeSession'])->name('sessions.revoke');
     Route::post('/security/sessions/logout-others', [SecurityController::class,'revokeOthers'])->name('sessions.others');

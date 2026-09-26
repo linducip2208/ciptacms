@@ -25,5 +25,6 @@ Route::get('/blog/{slug}', [HomeController::class,'post'])->name('post.show');
 Route::get('/p/{slug}', [HomeController::class,'page'])->name('page.show');
 Route::get('/sitemap.xml', [HomeController::class,'sitemap']);
 Route::get('/robots.txt', [HomeController::class,'robots']);
+Route::get('/docs', fn()=>view('docs.index'))->name('docs');
 
 require __DIR__.'/admin.php';

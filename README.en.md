@@ -2,7 +2,7 @@
 
 > Also available in [Indonesia](README.id.md) · [العربية](README.ar.md)
 
-Lindu CMS is a **Laravel 13 + PHP 8.3** CMS and application foundation for Jodohku, POS, ERP, Hotel, LMS, Marketplace, SaaS and Company Profiles. **Core never contains app-specific logic** — everything business lives in `modules/`.
+Lindu CMS is a **Laravel 13 + PHP 8.3 + Tabler** CMS and application foundation for Jodohku, POS, ERP, Hotel, LMS, Marketplace, SaaS and Company Profiles. **Core never contains app-specific logic** — everything business lives in `modules/`.
 
 ## Features
 ### 1. Core Engine
