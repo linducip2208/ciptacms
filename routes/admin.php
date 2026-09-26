@@ -43,6 +43,8 @@ Route::prefix('admin')->middleware(['web','auth'])->name('admin.')->group(functi
     Route::post('/media', [MediaController::class,'store'])->name('media.store');
     Route::post('/media/{media}/reprocess', [MediaController::class,'reprocess'])->name('media.reprocess');
     Route::get('/media/{media}/thumb/{variant}', [MediaController::class,'thumb'])->name('media.thumb');
+    Route::post('/uploads/presign', [\App\Http\Controllers\Admin\UploadController::class,'presign'])->name('uploads.presign');
+    Route::post('/uploads/confirm', [\App\Http\Controllers\Admin\UploadController::class,'confirm'])->name('uploads.confirm');
     Route::delete('/media/{media}', [MediaController::class,'destroy'])->name('media.destroy');
 
     Route::get('/security/2fa', [SecurityController::class,'twoFactor'])->name('2fa');
@@ -93,4 +95,7 @@ Route::prefix('admin')->middleware(['web','auth'])->name('admin.')->group(functi
     Route::post('/backups', [SystemController::class,'runBackup'])->name('backups.run');
     Route::get('/updates', [SystemController::class,'updates'])->name('updates');
     Route::get('/search', [SystemController::class,'search'])->name('search');
+    Route::get('/queue', [\App\Http\Controllers\Admin\QueueController::class,'index'])->name('queue');
+    Route::post('/queue/{id}/retry', [\App\Http\Controllers\Admin\QueueController::class,'retry'])->name('queue.retry');
+    Route::post('/queue/flush', [\App\Http\Controllers\Admin\QueueController::class,'flush'])->name('queue.flush');
 });

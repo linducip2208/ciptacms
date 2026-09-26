@@ -65,6 +65,7 @@ table.tbl{width:100%;font-size:.85rem}table.tbl th{text-align:left;padding:.6rem
 <li class="nav-item"><a class="nav-link" href="{{ route('admin.settings') }}"><span class="nav-link-icon"><i class="ti ti-settings"></i></span> Settings</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ route('admin.api-docs') }}"><span class="nav-link-icon"><i class="ti ti-api"></i></span> API Docs</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ route('admin.health') }}"><span class="nav-link-icon"><i class="ti ti-heartbeat"></i></span> Health</a></li>
+<li class="nav-item"><a class="nav-link" href="{{ route('admin.queue') }}"><span class="nav-link-icon"><i class="ti ti-clock"></i></span> Queue</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ route('admin.audits') }}"><span class="nav-link-icon"><i class="ti ti-list"></i></span> Audit Log</a></li>
 <li class="nav-item"><a class="nav-link" href="{{ route('admin.backups') }}"><span class="nav-link-icon"><i class="ti ti-database"></i></span> Backups</a></li>
 </ul>

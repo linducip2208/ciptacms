@@ -7,7 +7,9 @@ class SecurityController extends AdminController {
     public function twoFactor(Request $r, TwoFactorService $tfa){
         $u=$r->user();
         if(!$u->two_factor_secret){ $secret=$tfa->generateSecret(); $u->update(['two_factor_secret'=>$secret]); $u=$u->fresh(); }
-        return view('admin.security.2fa',['user'=>$u,'otpauth'=>$tfa->otpauthUrl($u->email,$u->two_factor_secret)]);
+        $otpauth=$tfa->otpauthUrl($u->email,$u->two_factor_secret);
+        try{ $qr=app(\App\Core\Services\QrService::class)->svg($otpauth,200); }catch(\Throwable $e){ $qr=null; }
+        return view('admin.security.2fa',['user'=>$u,'otpauth'=>$otpauth,'qr'=>$qr]);
     }
     public function twoFactorEnable(Request $r, TwoFactorService $tfa){
         $r->validate(['code'=>'required']); $u=$r->user();

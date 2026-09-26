@@ -20,7 +20,7 @@ class AllResourcesTest extends TestCase {
         $this->seed([RolesPermissionsSeeder::class, SettingSeeder::class]);
         $u=User::create(['name'=>'A','email'=>'a@a.local','password'=>Hash::make('password123'),'status'=>'active','is_active'=>true]);
         $this->actingAs($u)->get('/admin')->assertOk()->assertSee('tabler',false);
-        $this->actingAs($u)->get('/admin/security/2fa')->assertOk()->assertSee('QRCode',false);
+        $this->actingAs($u)->get('/admin/security/2fa')->assertOk()->assertSee('Scan QR',false);
         $this->actingAs($u)->get('/admin/api-docs')->assertOk()->assertSee('Swagger',false);
         $this->get('/docs')->assertOk()->assertSee('swagger',false);
         $this->get('/login')->assertOk()->assertSee('tabler',false);
