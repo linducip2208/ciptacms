@@ -44,6 +44,9 @@ Web installer `/install`, console `lindu:install`; 15 modules: ecommerce, POS (s
 ### Payments / PWA / Tenant-DB
 Adapters Xendit/iPaymu/Tripay/Stripe/Manual (`/admin/gateways` + test), PWA (`manifest.webmanifest` + `sw.js`), tenant separate-DB ready (`config/tenancy.php`).
 
+### Ops additions (v1.3–v1.5)
+Server-side QR SVG for 2FA, queue monitor (`/admin/queue` + retry/flush), `lindu:search-index` (Meili), S3 presigned direct-upload, `lindu:doctor` health check, 100% Tabler admin, 34-page render coverage.
+
 ## Install / Develop / Test
 ```sh
 composer install; cp .env.example .env; php artisan key:generate

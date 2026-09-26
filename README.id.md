@@ -41,6 +41,9 @@ Search global (abstraksi), CSV export/import, task, admin responsif (dark/light,
 ### Pembayaran / PWA / Tenant-DB
 Adapter Xendit/iPaymu/Tripay/Stripe/Manual (`/admin/gateways` + tombol test), PWA (`manifest.webmanifest` + `sw.js`), siap separate-DB (`config/tenancy.php`).
 
+### Tambahan ops (v1.3–v1.5)
+QR server-side (SVG) untuk 2FA, monitor queue (`/admin/queue` + retry/flush), `lindu:search-index` (Meili), direct-upload S3 presigned, `lindu:doctor` cek kesehatan, admin 100% Tabler, cakupan render 34 halaman.
+
 ## Instalasi / Develop / Test
 ```sh
 composer install; cp .env.example .env; php artisan key:generate

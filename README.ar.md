@@ -37,6 +37,9 @@
 ### التطبيقات والدفع و PWA
 متجر، نقاط بيع، فندق، تعليم، CRM، سوق، **Jodohku**؛ بوابات Xendit/iPaymu/Tripay/Stripe؛ تطبيق ويب تقدمي PWA.
 
+### إضافات (v1.3–v1.5)
+QR من الخادم، مراقبة الطوابير، فهرسة البحث، رفع S3 المباشر، فحص الصحة `lindu:doctor`، إدارة Tabler كاملة.
+
 ## التثبيت
 ```sh
 composer install; cp .env.example .env; php artisan key:generate
