@@ -1,6 +1,11 @@
 # Troubleshooting 503 Service Unavailable (Lokal)
 
-> Teks persis "temporarily unable ... maintenance downtime or capacity problems" = halaman default **Apache (Laragon)**, BUKAN dari kode Lindu (kode tidak pernah return 503 — sudah di-grep).
+> Teks persis "temporarily unable ... maintenance downtime or capacity problems" = halaman default **Apache**, BUKAN dari kode Lindu.
+
+## Kasus nyata: http://ciptacms.test/ → 503
+**Penyebab (terbukti dari log):** file vhost `auto.ciptacms.test.conf` dibuat jam 14:26, sedangkan Apache start jam 01:35 — Apache belum kenal hostname itu sehingga request jatuh ke vhost default (`alias/wanode.conf`) yang proxy ke backend Node `127.0.0.1:8891` yang sedang mati:
+`AH00957: attempt to connect to 127.0.0.1:8891 failed` → 503.
+**Fix:** reload Apache dari Laragon (klik kanan tray → Reload, atau Stop All → Start All). CLI `httpd -k restart` TIDAK bisa (Apache Laragon bukan Windows service).
 
 ## Fix cepat (2 menit)
 1. Tutup semua `php artisan serve` lama. Jalankan satu saja:
