@@ -5,28 +5,56 @@ use Illuminate\Http\Request; use Illuminate\Support\Facades\{Auth,Hash,Password}
 use App\Models\{User,LoginHistory};
 use App\Core\Services\WorkflowEngine;
 class AuthController extends Controller {
+    /** Fallbacks used when the operator has not set the security values. */
+    protected function maxAttempts(): int {
+        return max(3, (int) setting('security.max_login_attempts', config('lindu.security.max_login_attempts', 5)));
+    }
+
+    protected function lockoutSeconds(): int {
+        return max(60, (int) setting('security.lockout_minutes', config('lindu.security.lockout_minutes', 15)) * 60);
+    }
+
     public function showLogin(){ return view('auth.login'); }
     public function login(Request $r){
         $r->validate(['email'=>'required|email','password'=>'required']);
-        $key = strtolower($r->email).'|'.$r->ip();
-        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($key, 5)) return back()->withErrors(['email'=>'Too many attempts. Try later.']);
+        $key = 'login:'.strtolower($r->email).'|'.$r->ip();
+        $max = $this->maxAttempts();
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($key, $max)) {
+            $seconds = \Illuminate\Support\Facades\RateLimiter::availableIn($key);
+            return back()->withErrors(['email'=>"Too many attempts. Try again in {$seconds} seconds."]);
+        }
         $user = User::where('email',$r->email)->first();
         if (!$user || !Hash::check($r->password,$user->password)) {
-            \Illuminate\Support\Facades\RateLimiter::hit($key, 900);
+            \Illuminate\Support\Facades\RateLimiter::hit($key, $this->lockoutSeconds());
             if($user) LoginHistory::create(['user_id'=>$user->id,'ip'=>$r->ip(),'user_agent'=>$r->userAgent(),'status'=>'failed','failed_reason'=>'bad_credentials','logged_in_at'=>now()]);
             return back()->withErrors(['email'=>'Invalid credentials']);
         }
         if (!$user->isActive()) return back()->withErrors(['email'=>'Account '.$user->status]);
+
+        // An operator can require a second factor for every account. A user
+        // who has not set one up cannot complete the challenge, so they are
+        // told to enrol rather than being dropped into a dead end.
+        if (setting('security.force_2fa', false) && ! $user->two_factor_enabled) {
+            LoginHistory::create([
+                'user_id' => $user->id, 'ip' => $r->ip(), 'user_agent' => $r->userAgent(),
+                'status' => 'failed', 'failed_reason' => 'two_factor_not_enrolled', 'logged_in_at' => now(),
+            ]);
+            return back()->withErrors(['email'=>'Two-factor authentication is required on this site. Set it up under Users → Security before signing in.']);
+        }
+
         // 2FA challenge
         if ($user->two_factor_enabled) {
             $r->session()->put('2fa:user_id',$user->id);
             $r->session()->put('2fa:remember',$r->boolean('remember'));
+            // A fresh budget for the second factor: the password step already
+            // had its own limiter.
+            $r->session()->put('2fa:attempts',0);
             return redirect()->route('2fa.challenge');
         }
         return $this->finishLogin($r,$user);
     }
     protected function finishLogin(Request $r, User $user){
-        \Illuminate\Support\Facades\RateLimiter::clear(strtolower($user->email).'|'.$r->ip());
+        \Illuminate\Support\Facades\RateLimiter::clear('login:'.strtolower($user->email).'|'.$r->ip());
         Auth::login($user, $r->session()->pull('2fa:remember', $r->boolean('remember')));
         $r->session()->regenerate();
         try{
@@ -41,23 +69,50 @@ class AuthController extends Controller {
     public function verifyChallenge(Request $r){
         $r->validate(['code'=>'required']);
         $uid=$r->session()->get('2fa:user_id'); if(!$uid) return redirect()->route('login');
+
+        // TOTP is six digits, valid for ~30 seconds. Without a budget here an
+        // attacker holding a stolen password could simply cycle codes.
+        $attempts = (int) $r->session()->get('2fa:attempts', 0);
+        $budget = $this->maxAttempts();
+        if ($attempts >= $budget) {
+            $r->session()->forget(['2fa:user_id', '2fa:attempts']);
+            \Illuminate\Support\Facades\Auth::logout();
+            return redirect()->route('login')
+                ->withErrors(['code'=>"Too many invalid codes. Sign in again."]);
+        }
+
         $user=User::findOrFail($uid);
         $tfa=app(\App\Core\Services\TwoFactorService::class);
         $ok=$tfa->verify($user->two_factor_secret??'',$r->code);
         if(!$ok && in_array(strtoupper(trim($r->code)), (array)$user->two_factor_backup_codes)){
             $codes=array_values(array_diff((array)$user->two_factor_backup_codes,[strtoupper(trim($r->code))])); $user->update(['two_factor_backup_codes'=>$codes]); $ok=true;
         }
-        if(!$ok){ LoginHistory::create(['user_id'=>$user->id,'ip'=>$r->ip(),'user_agent'=>$r->userAgent(),'status'=>'failed','failed_reason'=>'bad_2fa','logged_in_at'=>now()]); return back()->withErrors(['code'=>'Invalid 2FA code']); }
-        $r->session()->forget('2fa:user_id');
+        if(!$ok){
+            $r->session()->put('2fa:attempts', $attempts + 1);
+            LoginHistory::create(['user_id'=>$user->id,'ip'=>$r->ip(),'user_agent'=>$r->userAgent(),'status'=>'failed','failed_reason'=>'bad_2fa','logged_in_at'=>now()]);
+            return back()->withErrors(['code'=>'Invalid 2FA code']);
+        }
+        $r->session()->forget(['2fa:user_id', '2fa:attempts']);
         return $this->finishLogin($r,$user);
     }
     public function showRegister(){ return view('auth.register'); }
     public function register(Request $r){
+        // Self-registration is off unless an operator turns it on, and it is
+        // rate limited so it cannot be used to mass-create accounts.
+        if (! setting('security.allow_registration', false)) {
+            return redirect()->route('login')->withErrors(['email'=>'Registration is closed.']);
+        }
+
         $d=$r->validate(['name'=>'required|max:100','email'=>'required|email|unique:users,email','password'=>'required|min:8|confirmed']);
         $u=User::create(['name'=>$d['name'],'email'=>$d['email'],'password'=>Hash::make($d['password']),'status'=>'active','is_active'=>true]);
         try{ $role=\App\Models\Role::where('slug','member')->first(); if($role) $u->roles()->attach($role);}catch(\Throwable $e){}
         try{ app(WorkflowEngine::class)->trigger('user.registered',['user_id'=>$u->id,'email'=>$u->email]); }catch(\Throwable $e){}
-        Auth::login($u); return redirect('/admin');
+        try{ LoginHistory::create(['user_id'=>$u->id,'ip'=>$r->ip(),'user_agent'=>$r->userAgent(),'status'=>'success','logged_in_at'=>now()]); }catch(\Throwable $e){}
+
+        // Log in through the same path as a normal sign-in so the session id
+        // is regenerated. Calling Auth::login() directly left the pre-auth
+        // session in place, which is a session-fixation hole.
+        return $this->finishLogin($r, $u);
     }
     public function logout(Request $r){ try{ app(\App\Core\Services\AuditService::class)->log('logout', $r->user() ?? 'user'); }catch(\Throwable $e){} Auth::logout(); $r->session()->invalidate(); $r->session()->regenerateToken(); return redirect('/login'); }
     public function showForgot(){ return view('auth.forgot'); }

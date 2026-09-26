@@ -17,4 +17,32 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(fn (Request $request) => $request->is('api/*') || $request->expectsJson());
+
+        // A plan limit is a billing condition, not a server fault. 402 makes
+        // that explicit instead of surfacing as a 500.
+        $exceptions->render(function (\App\Core\Services\Quota\QuotaExceeded $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'errors' => ['quota' => [[
+                        'metric' => $e->metric,
+                        'used' => $e->used,
+                        'limit' => $e->limit,
+                    ]]],
+                ], 402);
+            }
+
+            return back()->withErrors(['quota' => $e->getMessage()]);
+        });
+
+        $exceptions->render(function (\App\Core\Services\Quota\FeatureUnavailable $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'errors' => ['feature' => [$e->feature]],
+                ], 403);
+            }
+
+            return back()->withErrors(['feature' => $e->getMessage()]);
+        });
     })->create();

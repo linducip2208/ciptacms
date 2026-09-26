@@ -78,15 +78,55 @@ class ContentTypeApiController extends ApiController
             $r->get('dir') === 'asc' ? 'asc' : 'desc');
 
         $perPage = min(100, max(1, (int) $r->get('per_page', 15)));
+        $page = $q->paginate($perPage);
 
-        return $this->paginated($q->paginate($perPage));
+        // Relations are only resolved when asked for, so a plain list stays
+        // one query per page instead of one per relation per record.
+        $include = $this->requestedRelations($r, $ct);
+
+        if ($include !== []) {
+            $registry = app(\App\Core\Services\RelationRegistry::class);
+            $page->getCollection()->transform(
+                fn ($record) => $registry->withRelations($record, $include)
+            );
+        }
+
+        return $this->paginated($page);
     }
 
-    public function showRecord(string $slug, $id)
+    /**
+     * Read `?include=a,b`. Unknown names are ignored rather than fatal, and
+     * the API never resolves more than the relations actually defined.
+     *
+     * @return array<int,string>
+     */
+    protected function requestedRelations(Request $r, ContentType $ct): array
+    {
+        $raw = $r->get('include');
+        if (! $raw) {
+            return [];
+        }
+
+        $known = app(\App\Core\Services\RelationRegistry::class)->namesFor($ct);
+
+        return array_values(array_intersect(
+            array_map('trim', explode(',', (string) $raw)),
+            $known
+        ));
+    }
+
+    public function showRecord(Request $r, string $slug, $id)
     {
         $ct = $this->type($slug);
+        $record = $ct->records()->findOrFail($id);
 
-        return $this->data($this->present($ct, $ct->records()->findOrFail($id)));
+        $include = $this->requestedRelations($r, $ct);
+
+        return $this->data(
+            $include !== []
+                ? app(\App\Core\Services\RelationRegistry::class)->withRelations($record, $include)
+                : $this->present($ct, $record)
+        );
     }
 
     public function storeRecord(Request $r, string $slug)

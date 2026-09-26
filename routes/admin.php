@@ -192,6 +192,9 @@ Route::prefix('admin')->middleware(['web', 'auth'])->name('admin.')->group(funct
     Route::delete('/cms/content-types/{contentType}', [DataBuilderController::class, 'destroy'])->name('cms.types.destroy');
     Route::get('/cms/content-types/fields', [DataBuilderController::class, 'fields'])->name('cms.types.fields');
     Route::get('/cms/content-types/relations', [DataBuilderController::class, 'relations'])->name('cms.types.relations');
+    Route::post('/cms/content-types/{contentType}/relations', [DataBuilderController::class, 'storeRelation'])->name('cms.types.relations.store');
+    Route::put('/cms/content-types/{contentType}/relations/{name}', [DataBuilderController::class, 'updateRelation'])->name('cms.types.relations.update');
+    Route::delete('/cms/content-types/{contentType}/relations/{name}', [DataBuilderController::class, 'destroyRelation'])->name('cms.types.relations.destroy');
     Route::post('/cms/content-types/{contentType}/fields', [DataBuilderController::class, 'storeField'])->name('cms.types.fields.store');
     Route::put('/cms/content-types/{contentType}/fields/{field}', [DataBuilderController::class, 'updateField'])->name('cms.types.fields.update');
     Route::delete('/cms/content-types/{contentType}/fields/{field}', [DataBuilderController::class, 'destroyField'])->name('cms.types.fields.destroy');

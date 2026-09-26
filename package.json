@@ -15,5 +15,12 @@
     },
     "optionalDependencies": {
         "@laravel/multiplex": "^0.4.1"
+    },
+    "dependencies": {
+        "@tabler/core": "~1.4.0",
+        "@tabler/icons-webfont": "^3.48.0",
+        "alpinejs": "^3.17.4",
+        "qrcode": "^1.5.4",
+        "swagger-ui-dist": "^5.33.0"
     }
 }

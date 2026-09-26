@@ -17,6 +17,7 @@ use App\Models\Cp\Service;
 use App\Models\Cp\TeamMember;
 use App\Models\Cp\Testimonial;
 use App\Models\Page;
+use App\Models\Comment;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -24,7 +25,20 @@ use Illuminate\Validation\ValidationException;
 
 class SiteController extends Controller
 {
-    public function __construct(protected SeoService $seo) {}
+    public function __construct(protected SeoService $seo)
+    {
+        // Layout resolution. An active theme that ships a views/ directory and
+        // opts in with "views": true in its theme.json gets its directory
+        // prepended to the view finder, so its site/layout.blade.php replaces
+        // the shipped one (and any other site.* view it ships) without
+        // resources/views being edited. Done once per request, and never
+        // fatally: a missing theme folder leaves the core layout in place.
+        try {
+            app(\App\Core\Services\ThemeManager::class)->applyViewOverrides();
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
 
     /**
      * Run a query, returning an empty result if the underlying table has not
@@ -377,6 +391,7 @@ class SiteController extends Controller
 
         return view('site.post', [
             'post' => $post,
+            'comments' => app(\App\Core\Services\CommentService::class)->forPost($post),
             'seo' => array_merge([
                 'title' => $post->title,
                 'description' => Str::limit(strip_tags((string) $post->excerpt), 160),
@@ -393,6 +408,46 @@ class SiteController extends Controller
                 ->limit(3)
                 ->get(),
         ]);
+    }
+
+    /**
+     * Public comment submission. The word filter decides whether the comment
+     * is published, held, flagged as spam or refused outright.
+     */
+    public function storeComment(Request $r, Post $post)
+    {
+        abort_if($post->status !== 'published', 404);
+
+        $data = $r->validate([
+            'body' => 'required|string|min:3|max:5000',
+            'author_name' => 'nullable|string|max:190',
+            'author_email' => 'nullable|email|max:190',
+            // Honeypot: a real visitor never fills this.
+            'website' => 'nullable|max:0',
+        ]);
+
+        if (! empty($data['website'])) {
+            return back()->with('ok', 'Thanks — your comment is awaiting moderation.');
+        }
+
+        $result = app(\App\Core\Services\CommentService::class)->submit(
+            $post,
+            $data,
+            $r->ip(),
+            $r->userAgent(),
+            $r->user()
+        );
+
+        return back()->with($result['stored'] ? 'ok' : 'error', $result['message']);
+    }
+
+    public function reportComment(Request $r, Comment $comment)
+    {
+        $data = $r->validate(['reason' => 'nullable|string|max:255']);
+
+        app(\App\Core\Services\CommentService::class)->report($comment, $data['reason'] ?? null, $r->ip());
+
+        return back()->with('ok', 'Reported. A moderator will review it.');
     }
 
     public function page(string $slug)

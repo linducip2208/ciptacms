@@ -1,5 +1,6 @@
 <?php
 namespace App\Core\Services;
+use App\Core\Support\SafeCache;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
@@ -14,11 +15,50 @@ class SettingService {
         if (($row['type'] ?? '') === 'number') return is_numeric($v) ? $v + 0 : $default;
         return $v ?? $default;
     }
+    /**
+     * All settings, keyed by setting key.
+     *
+     * The cache holds a plain ARRAY, never a Collection. Round-tripping a
+     * Collection through a cache store comes back as
+     * __PHP_Incomplete_Class, and because setting() reads this from every
+     * view the first call fataled with "tried to call a method on an
+     * incomplete object". Arrays serialize without touching a class, so the
+     * cache is safe on every read.
+     */
     public function all() {
-        return Cache::remember('lindu.settings.all', 300, function () {
-            try { return Setting::all()->keyBy('key')->map(fn($s)=>['value'=>$s->value,'type'=>$s->type,'group'=>$s->group]); }
-            catch (\Throwable $e) { return collect(); }
-        });
+        $key = 'lindu.settings.all';
+
+        try {
+            $cached = Cache::get($key);
+            if (is_array($cached)) {
+                return collect($cached);
+            }
+        } catch (\Throwable $e) {
+            // Genuinely corrupt bytes: report and rebuild.
+            report($e);
+        }
+
+        SafeCache::discard($key);
+
+        $fresh = $this->buildAll()->all();
+
+        try {
+            Cache::put($key, $fresh, 300);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        return collect($fresh);
+    }
+
+    protected function buildAll() {
+        try {
+            return Setting::all()->keyBy('key')->map(fn($s)=>['value'=>$s->value,'type'=>$s->type,'group'=>$s->group]);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return collect();
+        }
     }
     public function set(string $key, $value, string $type='text', string $group='general'): void {
         if ($type==='secret' && $value) $value = Crypt::encryptString((string)$value);

@@ -3,9 +3,9 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>@yield('title','Dashboard') | {{ setting('general.site_name','Lindu CMS') }}</title>
 <link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#206bc4">
-<link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" rel="stylesheet">
-<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{{-- Tabler, its icon font and Alpine are bundled locally. A CDN outage must
+     not be able to take the admin panel — or the page builder — down. --}}
+@vite(['resources/css/tabler.css', 'resources/js/app.js'])
 <style>
 .nav-link.active{background:#206bc4;color:#fff!important;border-radius:.5rem}
 .nav-link{border-radius:.5rem}
@@ -48,5 +48,5 @@ table.tbl{width:100%;font-size:.85rem}table.tbl th{text-align:left;padding:.6rem
 </div></div>
 </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+@vite(['resources/js/tabler.js'])
 @stack('scripts')</body></html>

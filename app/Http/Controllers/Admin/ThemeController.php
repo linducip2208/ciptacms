@@ -23,7 +23,21 @@ class ThemeController extends AdminController
         try {
             $m->activate($slug);
 
-            return back()->with('ok', "Theme '{$slug}' activated");
+            $manifest = $m->find($slug);
+            $notes = [];
+            if (! empty($manifest['tokens']) || ! empty($manifest['settings'])) {
+                $notes[] = 'its colours and typography are now live';
+            }
+            if ($m->hasViewOverrides()) {
+                $notes[] = 'its layout now replaces the shipped site layout';
+            }
+
+            $message = "Theme '{$slug}' activated";
+            if ($notes) {
+                $message .= ' — '.implode(' and ', $notes);
+            }
+
+            return back()->with('ok', $message);
         } catch (\Throwable $e) {
             return back()->withErrors(['msg' => $e->getMessage()]);
         }
@@ -34,7 +48,7 @@ class ThemeController extends AdminController
         try {
             $m->deactivate($slug);
 
-            return back()->with('ok', "Theme '{$slug}' deactivated");
+            return back()->with('ok', "Theme '{$slug}' deactivated — the site is back to the default layout and colours");
         } catch (\Throwable $e) {
             return back()->withErrors(['msg' => $e->getMessage()]);
         }
@@ -56,7 +70,9 @@ class ThemeController extends AdminController
 
     /**
      * Theme customizer. Values live in appearance_options under the
-     * `customizer` group so they reset when a different theme is activated.
+     * `customizer` group and are applied *over* the active theme's own design
+     * tokens, so they survive a theme switch: switching themes changes the
+     * base layer, and these overrides keep winning until they are cleared.
      */
     public const CUSTOMIZER = [
         'colors' => [
@@ -93,11 +109,20 @@ class ThemeController extends AdminController
     public function customize()
     {
         $active = Theme::where('is_active', true)->first();
+        $tokens = [];
+
+        try {
+            $tokens = app(ThemeManager::class)->tokens();
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return view('admin.themes.customize', [
             'groups' => self::CUSTOMIZER,
             'values' => AppearanceOption::where('group', 'customizer')->pluck('value', 'key')->all(),
             'active' => $active,
+            // What the active theme contributes before these overrides apply.
+            'tokens' => $tokens,
         ]);
     }
 
@@ -123,32 +148,38 @@ class ThemeController extends AdminController
             }
         }
 
+        // ThemeManager caches the active slug for the request; drop it so a
+        // value saved now is visible to the very next render.
+        try {
+            app(ThemeManager::class)->reset();
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         $this->audit('update_theme_customizer', null, $r);
 
         return back()->with('ok', "Saved {$saved} customizer value(s). Reload the public site to see them.");
     }
 
-    /** Emitted as a CSS custom-property block on the public site. */
+    /**
+     * Emitted as a CSS custom-property block on the public site.
+     *
+     * The active theme's design tokens come first and the customizer's saved
+     * values are merged over them, so activation and customisation are the
+     * same code path. The selector is doubled (`:root:root`) because the
+     * shipped site layout hard-codes --lindu-primary, --lindu-secondary,
+     * --lindu-radius, --lindu-container and --lindu-section in a later
+     * `:root` block; a doubled selector wins that tie without the layout
+     * needing to know this block exists.
+     */
     public static function cssVariables(): string
     {
-        $values = AppearanceOption::where('group', 'customizer')->pluck('value', 'key')->all();
-        if (! $values) {
+        try {
+            return app(ThemeManager::class)->tokenCss();
+        } catch (\Throwable $e) {
+            report($e);
+
             return '';
         }
-
-        $out = [];
-        foreach ($values as $key => $value) {
-            [$group, $name] = array_pad(explode('.', (string) $key, 2), 2, $key);
-            if ($value === null || $value === '') {
-                continue;
-            }
-            if (in_array($name, ['font_family', 'base_size', 'container', 'radius', 'section_padding'], true)) {
-                $out[] = "  --lindu-{$name}: {$value};";
-            } else {
-                $out[] = "  --lindu-{$name}: {$value};";
-            }
-        }
-
-        return $out ? ":root {\n".implode("\n", $out)."\n}" : '';
     }
 }

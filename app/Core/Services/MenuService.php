@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Cache;
 class MenuService {
     public function tree(string $location='admin', $user=null): array {
         $key = 'lindu.menu.'.$location.'.'.($user?->id ?? 'guest').'.'.(app()->bound('tenant')&&app('tenant')?app('tenant')->id:'global');
-        return Cache::remember($key, 120, function () use ($location,$user) {
+        // SafeCache: the admin sidebar reads this on every page, so a cache
+        // entry that fails to decode must degrade, not fatal.
+        return \App\Core\Support\SafeCache::remember($key, 120, function () use ($location,$user) {
             $q = MenuItem::where('location',$location)->where('is_visible',true)->orderBy('sort_order');
             if (app()->bound('tenant') && app('tenant')) $q->where(fn($w)=>$w->whereNull('tenant_id')->orWhere('tenant_id', app('tenant')->id));
             $items = $q->get();

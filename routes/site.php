@@ -43,4 +43,13 @@ Route::post('/contact', [SiteController::class, 'submitContact'])->name('site.co
 Route::get('/blog', [SiteController::class, 'blog'])->name('site.blog');
 Route::get('/blog/{slug}', [SiteController::class, 'post'])->name('site.post');
 
+// Comments. The admin has always had moderation screens (Comments, Word
+// Filter, Reports); these are the public write paths they moderate.
+Route::post('/blog/{post}/comments', [SiteController::class, 'storeComment'])
+    ->middleware('throttle:comment')
+    ->name('site.comments.store');
+Route::post('/comments/{comment}/report', [SiteController::class, 'reportComment'])
+    ->middleware('throttle:comment')
+    ->name('site.comments.report');
+
 // Custom CMS pages live under /p/{slug} (see routes/web.php)

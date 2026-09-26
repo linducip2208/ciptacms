@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -62,9 +63,31 @@ class AppServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('login', function (Request $r) {
-            $max = (int) setting('security.max_login_attempts', config('lindu.security.max_login_attempts', 5));
+            $max = max(3, (int) setting('security.max_login_attempts', config('lindu.security.max_login_attempts', 5)));
 
-            return Limit::perMinute(max(3, $max))->by(\Illuminate\Support\Str::lower((string) $r->input('email')).'|'.$r->ip());
+            return Limit::perMinute($max)->by(Str::lower((string) $r->input('email')).'|'.$r->ip());
+        });
+
+        // TOTP codes are six digits and short-lived, so the second factor gets
+        // its own budget in addition to the one held in the session.
+        RateLimiter::for('2fa-challenge', function (Request $r) {
+            $max = max(3, (int) setting('security.max_login_attempts', 5));
+
+            return Limit::perMinute($max)->by('2fa|'.$r->session()->get('2fa:user_id', $r->ip()));
+        });
+
+        RateLimiter::for('register', function (Request $r) {
+            return Limit::perHour(5)->by($r->ip());
+        });
+
+        RateLimiter::for('password-reset', function (Request $r) {
+            return Limit::perHour(5)->by(Str::lower((string) $r->input('email', '')).'|'.$r->ip());
+        });
+
+        // Public comment posting: enough for a conversation, not enough for
+        // a spam run.
+        RateLimiter::for('comment', function (Request $r) {
+            return Limit::perMinute(3)->by($r->ip());
         });
     }
 }

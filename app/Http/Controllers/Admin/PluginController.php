@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Core\Plugins\PluginException;
+use App\Core\Plugins\UnknownPluginException;
 use App\Core\Services\PluginManager;
 use App\Models\Plugin;
 use Illuminate\Http\Request;
@@ -28,17 +30,68 @@ class PluginController extends AdminController
         ]);
     }
 
+    /**
+     * POST /admin/plugins/{slug}/{action}
+     *
+     * There is no dynamic method call here. `{action}` is matched against the
+     * five lifecycle verbs by name, and anything else is treated as a
+     * plugin-declared action key that PluginManager::callAction() resolves
+     * through the plugin's own manifest — so a URL can never name a method.
+     */
     public function action(string $slug, string $action, PluginManager $m)
     {
-        abort_unless(in_array($action, ['install', 'activate', 'deactivate', 'uninstall', 'update'], true), 404);
+        if (! in_array($action, PluginManager::ACTIONS, true)) {
+            return $this->pluginAction($slug, $action, $m);
+        }
 
         try {
-            $m->$action($slug);
+            match ($action) {
+                'install' => $m->install($slug),
+                'activate' => $m->activate($slug),
+                'deactivate' => $m->deactivate($slug),
+                'uninstall' => $m->uninstall($slug),
+                'update' => $m->update($slug),
+            };
 
-            return back()->with('ok', ucfirst($action).'d: '.$slug);
+            return back()->with('ok', $this->verb($action).$slug);
+        } catch (UnknownPluginException|PluginException) {
+            // An unresolvable slug is a 404, not a 500 with a class name in it.
+            abort(404);
         } catch (\Throwable $e) {
             return back()->withErrors(['msg' => $e->getMessage()]);
         }
+    }
+
+    /** A plugin-declared action, or 404 when the manifest does not allow it. */
+    protected function pluginAction(string $slug, string $action, PluginManager $m)
+    {
+        try {
+            $result = $m->callAction($slug, $action);
+        } catch (UnknownPluginException|PluginException) {
+            abort(404);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['msg' => $e->getMessage()]);
+        }
+
+        $this->audit('run_plugin_action', null, request());
+
+        if (is_string($result) && $result !== '') {
+            return back()->with('ok', $result);
+        }
+
+        return back()->with('ok', "Ran '{$action}' on {$slug}");
+    }
+
+    /** Past-tense label for a lifecycle verb. */
+    protected function verb(string $action): string
+    {
+        return [
+            'install' => 'Installed: ',
+            'activate' => 'Activated: ',
+            'deactivate' => 'Deactivated: ',
+            'uninstall' => 'Uninstalled: ',
+            'update' => 'Updated: ',
+        ][$action] ?? 'Ran: ';
     }
 
     public function settings()

@@ -19,6 +19,7 @@ class FeatureFlag
 
         try {
             $query = PlanFeature::where('key', $key);
+
             if ($tenant instanceof Tenant && $tenant->plan_id) {
                 $feature = $query->where('plan_id', $tenant->plan_id)->first();
                 if ($feature) {
@@ -26,9 +27,13 @@ class FeatureFlag
                 }
             }
 
-            // No plan row: fall back to the plan_features table as a whole so a
-            // feature only listed on any plan is considered available.
-            return PlanFeature::where('key', $key)->exists();
+            // Nothing configured for this plan.
+            //
+            // Default is ON. A feature is only off when some plan explicitly
+            // records is_enabled = false, or this plan does. Treating "no
+            // configuration" as "disabled" would lock a fresh single-tenant
+            // install out of its own page builder.
+            return ! PlanFeature::where('key', $key)->where('is_enabled', false)->exists();
         } catch (\Throwable $e) {
             // Table missing during install: allow everything rather than
             // locking the operator out of their own site.

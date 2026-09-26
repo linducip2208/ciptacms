@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Core\Services\DataBuilderService;
 use App\Core\Services\ImportExportService;
+use App\Core\Services\RelationRegistry;
 use App\Models\ContentRecord;
 use App\Models\ContentType;
 use Illuminate\Http\Request;
@@ -131,8 +132,59 @@ class DataBuilderController extends AdminController
     {
         return view('admin.data.relations', [
             'types' => ContentType::orderBy('name')->get(),
-            'relationTypes' => self::RELATION_TYPES,
+            'relationTypes' => RelationRegistry::TYPES,
+            'pivotTypes' => RelationRegistry::PIVOT_TYPES,
         ]);
+    }
+
+    // ---- relation management -----------------------------------------
+
+    public function storeRelation(Request $r, ContentType $contentType)
+    {
+        $data = $r->validate([
+            'name' => 'required|string|max:40',
+            'type' => 'required|in:'.implode(',', array_keys(RelationRegistry::TYPES)),
+            'target' => 'required|string|max:190',
+            'label' => 'nullable|string|max:190',
+        ]);
+
+        try {
+            $definition = app(RelationRegistry::class)->add($contentType, $data);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['msg' => $e->getMessage()]);
+        }
+
+        $this->audit('create_relation', $contentType, $r);
+
+        return back()->with('ok', "Relation [{$definition['name']}] → {$definition['target']} ({$definition['type']}) created");
+    }
+
+    public function updateRelation(Request $r, ContentType $contentType, string $name)
+    {
+        $data = $r->validate([
+            'name' => 'nullable|string|max:40',
+            'type' => 'required|in:'.implode(',', array_keys(RelationRegistry::TYPES)),
+            'target' => 'required|string|max:190',
+            'label' => 'nullable|string|max:190',
+        ]);
+
+        try {
+            $definition = app(RelationRegistry::class)->update($contentType, $name, $data);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['msg' => $e->getMessage()]);
+        }
+
+        $this->audit('update_relation', $contentType, $r);
+
+        return back()->with('ok', "Relation [{$definition['name']}] updated");
+    }
+
+    public function destroyRelation(Request $r, ContentType $contentType, string $name)
+    {
+        app(RelationRegistry::class)->remove($contentType, $name);
+        $this->audit('delete_relation', $contentType, $r);
+
+        return back()->with('ok', "Relation [{$name}] removed");
     }
 
     public function storeField(Request $r, ContentType $contentType)

@@ -7,6 +7,8 @@
     <meta name="theme-color" content="{{ setting('branding.primary_color', '#1d4ed8') }}">
     <title>@yield('title', setting('general.site_name', 'Lindu CMS'))</title>
     <link rel="icon" href="{{ setting('branding.favicon', '/favicon.ico') }}">
+    {{-- Tailwind + Alpine are bundled locally; no runtime CDN dependency. --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     {!! app(\App\Core\Services\SeoService::class)->render($seo ?? null) !!}
     @if(setting('branding.custom_css'))
         <style>{!! setting('branding.custom_css') !!}</style>

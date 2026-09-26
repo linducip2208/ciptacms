@@ -3,11 +3,8 @@
   "slug": "seo-booster",
   "version": "1.0.0",
   "author": "Lindu",
-  "description": "Adds extra meta helpers",
-  "hooks": [
-    "page.rendered"
-  ],
-  "filters": [
-    "seo.meta"
-  ]
+  "description": "Adds extra meta helpers to the rendered <head>: a novel meta tag and a per-page noindex escape hatch.",
+  "class": "Plugins\\SeoBooster\\Plugin",
+  "filters": ["seo.meta"],
+  "hooks": ["page.rendered"]
 }

@@ -19,8 +19,9 @@
 </div>
 </div>
 @if(empty($qr))
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-<script>try{ QRCode.toCanvas(@json($otpauth), {width:180}, function(e,c){ if(!e) document.getElementById('qr').appendChild(c); }); }catch(e){ document.getElementById('qr').innerText='QR gagal dimuat — salin URL di atas'; }</script>
+{{-- PHP could not produce the QR; fall back to the bundled renderer. --}}
+@vite(['resources/js/qr.js'])
+<script>renderLinduQr(document.getElementById('qr'), @json($otpauth), 180);</script>
 @endif
 @else
 <div class="mt-3"><div class="d-flex justify-content-between items-center"><b>Backup codes:</b><div class="d-flex gap-2"><form method="POST" action="{{ route('admin.2fa.regen') }}">@csrf<button class="text-xs text-indigo-600">Regenerate</button></form><button class="text-xs" onclick="window.print()">Print</button></div></div>

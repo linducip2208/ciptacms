@@ -2,6 +2,7 @@
 namespace App\Core\Services;
 use App\Models\MediaFile;
 use App\Jobs\ProcessMediaJob;
+use App\Core\Services\Quota;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -10,6 +11,10 @@ class MediaService {
         $max = (int)config('lindu.media.max_upload_mb',10);
         if ($file->getSize() > $max*1024*1024) throw new \RuntimeException("File exceeds {$max}MB");
         $this->assertAllowed($file);
+
+        // Plan cap on uploads. Throws before anything is written to disk.
+        Quota::guard('media', 1, $tenantId ? \App\Models\Tenant::find($tenantId) : null);
+
         $disk = config('lindu.media.disk','public');
         $path = $file->store('media/'.date('Y/m'), $disk);
         $meta = ['original'=>$file->getClientOriginalName(),'mime'=>$file->getMimeType(),'size'=>$file->getSize()];
@@ -22,6 +27,7 @@ class MediaService {
             'alt'=>pathinfo($file->getClientOriginalName(),PATHINFO_FILENAME),
             'meta'=>$meta,'uuid'=>(string)Str::uuid(),'status'=>'processing','optimized'=>false,
         ]);
+        Quota::consume('media', 1, $tenantId ? \App\Models\Tenant::find($tenantId) : null);
         if ($async && str_starts_with((string)$file->getMimeType(),'image')) {
             try { ProcessMediaJob::dispatch($row->id); } catch(\Throwable $e){ $this->process($row->fresh()); }
         } else {

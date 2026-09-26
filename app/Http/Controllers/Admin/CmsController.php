@@ -64,6 +64,12 @@ class CmsController extends AdminController
 
     public function pageSave(Request $r, ?string $id = null)
     {
+        // A new page costs quota; updating an existing one does not.
+        if ($id === null) {
+            \App\Core\Services\Quota::guard('pages', 1);
+            \App\Core\Services\Quota::assertFeature('page_builder');
+        }
+
         $d = $r->validate([
             'title' => 'required|string|max:190',
             'slug' => 'nullable|string|max:190',
@@ -201,6 +207,10 @@ class CmsController extends AdminController
 
     public function postSave(Request $r, ?Post $post = null)
     {
+        if ($post === null) {
+            \App\Core\Services\Quota::guard('posts', 1);
+        }
+
         $d = $r->validate([
             'title' => 'required|string|max:190',
             'slug' => 'nullable|string|max:190',

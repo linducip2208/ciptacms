@@ -157,8 +157,9 @@ class SettingsController extends AdminController
             'label' => 'Security',
             'group' => 'security',
             'fields' => [
-                ['key' => 'security.force_2fa', 'label' => 'Require 2FA for all admins', 'type' => 'boolean', 'default' => false],
-                ['key' => 'security.max_login_attempts', 'label' => 'Max login attempts', 'type' => 'number', 'default' => '5'],
+                ['key' => 'security.force_2fa', 'label' => 'Require 2FA for all admins', 'type' => 'boolean', 'default' => false, 'help' => 'Blocks sign-in for any account without a second factor enrolled. Those users must enrol under Users → Security first.'],
+                ['key' => 'security.allow_registration', 'label' => 'Allow self-registration', 'type' => 'boolean', 'default' => false, 'help' => 'When off, POST /register is refused and new users must be created by an admin.'],
+                ['key' => 'security.max_login_attempts', 'label' => 'Max login attempts', 'type' => 'number', 'default' => '5', 'help' => 'Applies to the password step and to the 2FA code step.'],
                 ['key' => 'security.lockout_minutes', 'label' => 'Lockout duration (minutes)', 'type' => 'number', 'default' => '15'],
                 ['key' => 'security.session_lifetime', 'label' => 'Session lifetime (minutes)', 'type' => 'number', 'default' => '120'],
                 ['key' => 'security.password_min_length', 'label' => 'Minimum password length', 'type' => 'number', 'default' => '8'],
