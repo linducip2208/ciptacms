@@ -26,4 +26,4 @@ php artisan serve
 ```
 Login: `admin@lindu.local` / `password123` · Docs: `ARCHITECTURE.md API.md DATABASE.md`
 
-Detail penuh lihat file per bahasa di atas. Push repo: https://github.com/linducip2208/ciptacms
+Detail penuh lihat file per bahasa di atas. Admin 100% Tabler. Push repo: https://github.com/linducip2208/ciptacms

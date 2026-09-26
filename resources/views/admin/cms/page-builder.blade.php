@@ -1,11 +1,11 @@
 @extends('admin.layout')@section('title','Page builder')@section('crumb','Pages / Builder')
 @section('content')
-<div class="card p-4 max-w-6xl" x-data="builder()" x-init="init()">
+<div class="card max-w-6xl" x-data="builder()" x-init="init()">
 <div class="grid md:grid-cols-2 gap-3 mb-3">
-<div><label class="text-sm">Title</label><input name="title" form="pageForm" value="{{ old('title',$row->title) }}" required class="input"></div>
-<div><label class="text-sm">Slug</label><input name="slug" form="pageForm" value="{{ old('slug',$row->slug) }}" class="input"></div>
+<div><label class="form-label">Title</label><input name="title" form="pageForm" value="{{ old('title',$row->title) }}" required class="form-control"></div>
+<div><label class="form-label">Slug</label><input name="slug" form="pageForm" value="{{ old('slug',$row->slug) }}" class="form-control"></div>
 </div>
-<div class="flex flex-wrap gap-2 mb-3 items-center">
+<div class="d-flex flex-wrap gap-2 mb-3 items-center">
 <template x-for="b in palette" :key="b.type"><button type="button" @click="addBlock(b.type)" class="border rounded-lg px-2 py-1 text-xs hover:bg-indigo-50" x-text="b.label"></button></template>
 <span class="flex-1"></span>
 <template x-for="d in ['desktop','tablet','mobile']"><button type="button" @click="device=d" :class="device===d?'btn-primary':'border rounded-lg px-2 py-1 text-xs'" x-text="d"></button></template>
@@ -13,15 +13,15 @@
 <button type="button" @click="redo()" class="border rounded-lg px-2 py-1 text-xs">Redo</button>
 <button type="button" @click="preview=!preview" class="border rounded-lg px-2 py-1 text-xs">Preview</button>
 </div>
-<div class="grid lg:grid-cols-2 gap-4">
+<div class="row row-cards">
 <div>
 <h4 class="text-sm font-semibold mb-1">Sections (<span x-text="sections.length"></span>)</h4>
 <template x-for="(s,si) in sections" :key="s._id">
 <div class="border rounded-lg p-2 mb-2 bg-slate-50 dark:bg-slate-800">
 <div class="flex gap-1 items-center mb-1">
-<input x-model="s.name" class="input !w-32 !py-1 !text-xs" placeholder="Section">
-<select x-model="s.layout" class="input !w-28 !py-1 !text-xs"><option>1-col</option><option>2-col</option><option>3-col</option><option>hero</option></select>
-<select x-model="s.visibility[device]" class="input !w-28 !py-1 !text-xs"><option value="show">show</option><option value="hide">hide</option></select>
+<input x-model="s.name" class="form-control !w-32 !py-1 !text-xs" placeholder="Section">
+<select x-model="s.layout" class="form-control !w-28 !py-1 !text-xs"><option>1-col</option><option>2-col</option><option>3-col</option><option>hero</option></select>
+<select x-model="s.visibility[device]" class="form-control !w-28 !py-1 !text-xs"><option value="show">show</option><option value="hide">hide</option></select>
 <button @click="move(sections,si,-1)" class="text-xs">↑</button><button @click="move(sections,si,1)" class="text-xs">↓</button>
 <button @click="removeSection(si)" class="text-xs text-rose-600">✕</button>
 </div>
@@ -30,15 +30,15 @@
 <div class="flex gap-1 items-center"><b class="text-xs" x-text="b.type"></b><span class="flex-1"></span>
 <button @click="move(s.blocks,bi,-1)" class="text-xs">↑</button><button @click="move(s.blocks,bi,1)" class="text-xs">↓</button>
 <button @click="s.blocks.splice(bi,1);push()" class="text-xs text-rose-600">✕</button></div>
-<input x-model="b.heading" @input="push()" class="input !py-1 !text-xs mt-1" placeholder="Heading">
-<textarea x-model="b.text" @input="push()" class="input !py-1 !text-xs mt-1" rows="2" placeholder="Text / HTML"></textarea>
-<div class="grid grid-cols-2 gap-1 mt-1"><input x-model="b.image" @input="push()" class="input !py-1 !text-xs" placeholder="Image URL"><input x-model="b.link" @input="push()" class="input !py-1 !text-xs" placeholder="Button link"></div>
+<input x-model="b.heading" @input="push()" class="form-control !py-1 !text-xs mt-1" placeholder="Heading">
+<textarea x-model="b.text" @input="push()" class="form-control !py-1 !text-xs mt-1" rows="2" placeholder="Text / HTML"></textarea>
+<div class="row g-1 mt-1"><input x-model="b.image" @input="push()" class="form-control !py-1 !text-xs" placeholder="Image URL"><input x-model="b.link" @input="push()" class="form-control !py-1 !text-xs" placeholder="Button link"></div>
 </div>
 </template>
 <button @click="addToSection(si)" class="text-xs text-indigo-600">+ block ke section ini</button>
 </div>
 </template>
-<button @click="addSection()" class="btn-primary text-xs">+ Section</button>
+<button @click="addSection()" class="btn btn-primary text-xs">+ Section</button>
 @if($templates->count())<div class="mt-2 text-xs">Template: <template x-for="t in tmpl" :key="t.slug"><button type="button" @click="loadBlocks(t.blocks)" class="badge ml-1" x-text="t.name"></button></template></div>@endif
 </div>
 <div>
@@ -49,7 +49,7 @@
 <div x-if="b.type==='heading'" class="text-xl font-bold" x-text="b.heading||'(heading)'"></div>
 <div x-if="b.type==='text'" class="text-sm" x-text="b.text||'(text)'"></div>
 <div x-if="b.type==='image'"><div class="bg-slate-100 rounded h-24 grid place-items-center text-xs" x-text="b.image||'(image)'"></div></div>
-<div x-if="b.type==='button'"><span class="btn-primary text-xs" x-text="b.heading||'Button'"></span></div>
+<div x-if="b.type==='button'"><span class="btn btn-primary text-xs" x-text="b.heading||'Button'"></span></div>
 <div x-if="!['heading','text','image','button'].includes(b.type)" class="text-xs border rounded p-2"><b x-text="b.type"></b>: <span x-text="b.heading"></span> <span x-text="b.text"></span></div>
 </div></template>
 </div></template>
@@ -60,12 +60,12 @@
 <form id="pageForm" method="POST" action="{{ route('admin.cms.pages.save',$row->id) }}">@csrf
 <input type="hidden" name="builder" :value="JSON.stringify({sections:sections})">
 <div class="grid md:grid-cols-3 gap-2 mt-3">
-<select name="status" class="input"><option value="draft" {{ $row->status=='draft'?'selected':'' }}>draft</option><option value="published" {{ $row->status=='published'?'selected':'' }}>published</option><option value="scheduled" {{ $row->status=='scheduled'?'selected':'' }}>scheduled</option></select>
-<input name="template" value="{{ $row->template }}" class="input" placeholder="template">
-<input name="featured_image" value="{{ $row->featured_image }}" class="input" placeholder="featured image">
+<select name="status" class="form-control"><option value="draft" {{ $row->status=='draft'?'selected':'' }}>draft</option><option value="published" {{ $row->status=='published'?'selected':'' }}>published</option><option value="scheduled" {{ $row->status=='scheduled'?'selected':'' }}>scheduled</option></select>
+<input name="template" value="{{ $row->template }}" class="form-control" placeholder="template">
+<input name="featured_image" value="{{ $row->featured_image }}" class="form-control" placeholder="featured image">
 </div>
-<textarea name="body" rows="4" class="input font-mono mt-2" placeholder="Body HTML (opsional)">{{ old('body',$row->body) }}</textarea>
-<button class="btn-primary mt-3">Save page + builder</button>
+<textarea name="body" rows="4" class="form-control font-mono mt-2" placeholder="Body HTML (opsional)">{{ old('body',$row->body) }}</textarea>
+<button class="btn btn-primary mt-3">Save page + builder</button>
 </form>
 </div>
 <script>

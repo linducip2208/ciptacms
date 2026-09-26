@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class SeoMeta extends Model
 {
     use HasFactory;
-
+    protected $table = 'seo_meta';
 protected $fillable = [
     'tenant_id',
     'seoable_type',

@@ -15,7 +15,9 @@ class ResourceController extends AdminController {
         try{ $q->orderBy($sort,$dir);}catch(\Throwable $e){}
         $rows = $q->paginate((int)$r->get('per_page',15))->withQueryString();
         if($r->expectsJson()) return $this->ok($rows);
-        return view('admin.resource.index',['resource'=>$resource,'rows'=>$rows,'config'=>$this->map[$resource]]);
+        $first=$rows->first()?->toArray() ?? ['name'=>''];
+        $columns=array_slice(array_keys($first),0,5);
+        return view('admin.resource.index',['resource'=>$resource,'rows'=>$rows,'config'=>$this->map[$resource],'columns'=>$columns]);
     }
     public function create(string $resource){ return view('admin.resource.form',['resource'=>$resource,'row'=>null,'config'=>$this->map[$resource]]); }
     public function store(Request $r, string $resource){
