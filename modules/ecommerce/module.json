@@ -1,0 +1,19 @@
+{
+  "name": "Ecommerce",
+  "slug": "ecommerce",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "Products, cart, orders, coupons",
+  "dependencies": [],
+  "menus": [
+    {
+      "title": "Ecommerce",
+      "url": "/admin/r/ecommerce",
+      "icon": "\ud83d\udce6"
+    }
+  ],
+  "permissions": [
+    "ecommerce.view",
+    "ecommerce.manage"
+  ]
+}

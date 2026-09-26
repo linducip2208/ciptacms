@@ -1,0 +1,5 @@
+@extends('admin.layout')
+@section('title','Modules')@section('crumb','Modules')
+@section('content')
+<div class="grid md:grid-cols-3 gap-4">@foreach($modules as $m)<div class="card p-4"><div class="flex justify-between"><b>{{ $m->name }}</b><span class="badge">{{ $m->is_active?'active':'inactive' }}</span></div><div class="text-xs text-slate-500">{{ $m->slug }} · v{{ $m->version }} · {{ $m->author }}</div><p class="text-sm my-2">{{ $m->description }}</p><div class="flex gap-2 text-sm">@if(!$m->is_active)<form method="POST" action="{{ route('admin.modules.action',[$m->slug,'activate']) }}">@csrf<button class="btn-primary">Activate</button></form>@else<form method="POST" action="{{ route('admin.modules.action',[$m->slug,'deactivate']) }}">@csrf<button class="border rounded-lg px-3 py-1">Deactivate</button></form>@endif<form method="POST" action="{{ route('admin.modules.action',[$m->slug,'install']) }}">@csrf<button class="text-slate-500">Install</button></form></div></div>@endforeach</div>
+@endsection

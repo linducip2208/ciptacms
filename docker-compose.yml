@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    ports: ['8000:80']
+    depends_on: [db, redis]
+  db:
+    image: mysql:8
+    environment: {MYSQL_ROOT_PASSWORD: root, MYSQL_DATABASE: lindu}
+  redis:
+    image: redis:7

@@ -1,0 +1,14 @@
+{
+  "name": "Lindu Default",
+  "slug": "default",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "Responsive default theme",
+  "layouts": [
+    "default",
+    "fullwidth"
+  ],
+  "settings": {
+    "primary": "#4f46e5"
+  }
+}

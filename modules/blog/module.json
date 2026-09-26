@@ -1,0 +1,19 @@
+{
+  "name": "Blog",
+  "slug": "blog",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "Posts, categories, tags",
+  "dependencies": [],
+  "menus": [
+    {
+      "title": "Blog",
+      "url": "/admin/r/blog",
+      "icon": "\ud83d\udce6"
+    }
+  ],
+  "permissions": [
+    "blog.view",
+    "blog.manage"
+  ]
+}

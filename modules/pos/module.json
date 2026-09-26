@@ -1,0 +1,19 @@
+{
+  "name": "POS",
+  "slug": "pos",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "Point of sale, sales, purchases",
+  "dependencies": [],
+  "menus": [
+    {
+      "title": "POS",
+      "url": "/admin/r/pos",
+      "icon": "\ud83d\udce6"
+    }
+  ],
+  "permissions": [
+    "pos.view",
+    "pos.manage"
+  ]
+}

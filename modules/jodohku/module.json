@@ -1,0 +1,19 @@
+{
+  "name": "Jodohku",
+  "slug": "jodohku",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "Member profiles, matching, membership",
+  "dependencies": [],
+  "menus": [
+    {
+      "title": "Jodohku",
+      "url": "/admin/r/jodohku",
+      "icon": "\ud83d\udce6"
+    }
+  ],
+  "permissions": [
+    "jodohku.view",
+    "jodohku.manage"
+  ]
+}

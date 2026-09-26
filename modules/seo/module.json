@@ -1,0 +1,19 @@
+{
+  "name": "SEO",
+  "slug": "seo",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "Meta, sitemap, schema",
+  "dependencies": [],
+  "menus": [
+    {
+      "title": "SEO",
+      "url": "/admin/r/seo",
+      "icon": "\ud83d\udce6"
+    }
+  ],
+  "permissions": [
+    "seo.view",
+    "seo.manage"
+  ]
+}

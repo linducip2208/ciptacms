@@ -1,0 +1,19 @@
+{
+  "name": "ERP Foundation",
+  "slug": "erp",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "Purchasing, inventory, projects-ready",
+  "dependencies": [],
+  "menus": [
+    {
+      "title": "ERP Foundation",
+      "url": "/admin/r/erp",
+      "icon": "\ud83d\udce6"
+    }
+  ],
+  "permissions": [
+    "erp.view",
+    "erp.manage"
+  ]
+}

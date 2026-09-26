@@ -1,0 +1,19 @@
+{
+  "name": "Pages",
+  "slug": "pages",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "CMS pages & templates",
+  "dependencies": [],
+  "menus": [
+    {
+      "title": "Pages",
+      "url": "/admin/r/pages",
+      "icon": "\ud83d\udce6"
+    }
+  ],
+  "permissions": [
+    "pages.view",
+    "pages.manage"
+  ]
+}

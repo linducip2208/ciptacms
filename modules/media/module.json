@@ -1,0 +1,19 @@
+{
+  "name": "Media",
+  "slug": "media",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "File manager & optimization",
+  "dependencies": [],
+  "menus": [
+    {
+      "title": "Media",
+      "url": "/admin/r/media",
+      "icon": "\ud83d\udce6"
+    }
+  ],
+  "permissions": [
+    "media.view",
+    "media.manage"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "SEO Booster",
+  "slug": "seo-booster",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "Adds extra meta helpers",
+  "hooks": [
+    "page.rendered"
+  ],
+  "filters": [
+    "seo.meta"
+  ]
+}

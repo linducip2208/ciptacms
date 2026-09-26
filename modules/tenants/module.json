@@ -1,0 +1,19 @@
+{
+  "name": "Tenants & SaaS",
+  "slug": "tenants",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "Multi-tenancy, plans, billing",
+  "dependencies": [],
+  "menus": [
+    {
+      "title": "Tenants & SaaS",
+      "url": "/admin/r/tenants",
+      "icon": "\ud83d\udce6"
+    }
+  ],
+  "permissions": [
+    "tenants.view",
+    "tenants.manage"
+  ]
+}

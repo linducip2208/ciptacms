@@ -1,0 +1,19 @@
+{
+  "name": "API Platform",
+  "slug": "api",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "REST v1, tokens, webhooks",
+  "dependencies": [],
+  "menus": [
+    {
+      "title": "API Platform",
+      "url": "/admin/r/api",
+      "icon": "\ud83d\udce6"
+    }
+  ],
+  "permissions": [
+    "api.view",
+    "api.manage"
+  ]
+}

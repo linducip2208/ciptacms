@@ -1,0 +1,13 @@
+{
+  "name": "Webhook Logger",
+  "slug": "webhook-logger",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "Logs outgoing webhooks",
+  "hooks": [
+    "page.rendered"
+  ],
+  "filters": [
+    "seo.meta"
+  ]
+}

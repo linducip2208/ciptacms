@@ -1,0 +1,19 @@
+{
+  "name": "Forms",
+  "slug": "forms",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "Form builder & submissions",
+  "dependencies": [],
+  "menus": [
+    {
+      "title": "Forms",
+      "url": "/admin/r/forms",
+      "icon": "\ud83d\udce6"
+    }
+  ],
+  "permissions": [
+    "forms.view",
+    "forms.manage"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "Hotel",
+  "slug": "hotel",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "Properties, rooms, reservations",
+  "dependencies": [],
+  "menus": [
+    {
+      "title": "Hotel",
+      "url": "/admin/r/hotel",
+      "icon": "\ud83d\udce6"
+    }
+  ],
+  "permissions": [
+    "hotel.view",
+    "hotel.manage"
+  ]
+}

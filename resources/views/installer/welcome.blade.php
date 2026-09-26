@@ -1,0 +1,7 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Install Lindu CMS</title><script src="https://cdn.tailwindcss.com"></script></head>
+<body class="min-h-screen bg-slate-100 grid place-items-center p-4"><div class="w-full max-w-2xl bg-white rounded-2xl shadow p-6"><h1 class="text-2xl font-bold mb-1">Install Lindu CMS</h1><p class="text-sm text-slate-500 mb-4">Requirements → Database → App → Admin → Finish</p>
+<div class="grid grid-cols-2 gap-2 text-sm mb-4">@foreach($checks as $k=>$c)<div class="border rounded p-2 {{ $c['ok']?'text-emerald-700':'text-rose-700' }}">{{ $k }}: {{ $c['ok']?'OK':'FAIL' }}</div>@endforeach</div>
+@if($errors->any())<div class="text-rose-600 text-sm mb-2">@foreach($errors->all() as $e)<div>{{ $e }}</div>@endforeach</div>@endif
+<form method="POST" action="{{ route('install.run') }}">@csrf
+<div class="grid md:grid-cols-2 gap-3"><input name="app_name" value="Lindu CMS" class="border rounded px-3 py-2" placeholder="App name"><input name="admin_name" class="border rounded px-3 py-2" placeholder="Admin name" required><input name="admin_email" type="email" class="border rounded px-3 py-2" placeholder="Admin email" required><input name="admin_password" type="password" class="border rounded px-3 py-2" placeholder="Admin password" required></div>
+<button class="mt-4 w-full bg-indigo-600 text-white rounded-lg py-2">Install now</button></form></div></body></html>

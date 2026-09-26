@@ -1,0 +1,14 @@
+{
+  "name": "Dark Commerce",
+  "slug": "dark-commerce",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "Dark storefront theme",
+  "layouts": [
+    "default",
+    "fullwidth"
+  ],
+  "settings": {
+    "primary": "#4f46e5"
+  }
+}

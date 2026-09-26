@@ -1,0 +1,4 @@
+@extends('admin.layout')@section('title','Form builder')@section('crumb','Forms')
+@section('content')<div class="card p-5"><h2 class="font-bold">{{ $form->name }}</h2><div class="text-sm text-slate-500 mb-3">Fields: text,email,phone,number,password,textarea,select,multi-select,checkbox,radio,switch,date,datetime,time,file,image,richtext,repeater,relation,hidden · validation · conditional · webhook · API</div>
+<table class="tbl"><thead><tr><th>Label</th><th>Name</th><th>Type</th><th>Required</th></tr></thead><tbody>@foreach($form->fields as $f)<tr><td>{{ $f->label }}</td><td>{{ $f->name }}</td><td>{{ $f->type }}</td><td>{{ $f->is_required?'yes':'no' }}</td></tr>@endforeach</tbody></table>
+<h3 class="font-semibold mt-4">Submissions ({{ $form->submissions->count() }})</h3>@foreach($form->submissions->take(10) as $s)<div class="text-xs border-b py-1 font-mono">{{ json_encode($s->data) }}</div>@endforeach</div>@endsection

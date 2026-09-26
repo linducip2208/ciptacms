@@ -1,0 +1,9 @@
+@extends('admin.layout')@section('title','Page editor')@section('crumb','Pages')
+@section('content')<div class="card p-5 max-w-4xl"><form method="POST" action="{{ route('admin.cms.pages.save',$row->id) }}">@csrf
+<div class="grid md:grid-cols-2 gap-3"><div><label class="text-sm">Title</label><input name="title" value="{{ old('title',$row->title) }}" required class="input"></div><div><label class="text-sm">Slug</label><input name="slug" value="{{ old('slug',$row->slug) }}" class="input"></div></div>
+<div class="grid md:grid-cols-3 gap-3 mt-3"><div><label class="text-sm">Status</label><select name="status" class="input"><option value="draft" {{ $row->status=='draft'?'selected':'' }}>draft</option><option value="published" {{ $row->status=='published'?'selected':'' }}>published</option><option value="scheduled" {{ $row->status=='scheduled'?'selected':'' }}>scheduled</option><option value="trash" {{ $row->status=='trash'?'selected':'' }}>trash</option></select></div>
+<div><label class="text-sm">Template</label><input name="template" value="{{ $row->template }}" class="input"></div><div><label class="text-sm">Featured image</label><input name="featured_image" value="{{ $row->featured_image }}" class="input"></div></div>
+<div class="mt-3"><label class="text-sm">Body (HTML)</label><textarea name="body" rows="10" class="input font-mono">{{ old('body',$row->body) }}</textarea></div>
+<div class="mt-3"><label class="text-sm">Page Builder JSON (sections/rows/columns/blocks, responsive, visibility)</label><textarea name="builder" rows="5" class="input font-mono" placeholder='{"sections":[]}'>{{ old('builder', is_array($row->builder)?json_encode($row->builder):$row->builder) }}</textarea></div>
+<div class="grid md:grid-cols-2 gap-3 mt-3"><input name="meta_title" placeholder="SEO title" class="input"><input name="meta_description" placeholder="SEO description" class="input"></div>
+<button class="btn-primary mt-4">Save page</button></form></div@endsection

@@ -1,0 +1,19 @@
+{
+  "name": "CRM",
+  "slug": "crm",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "Leads, deals, pipelines",
+  "dependencies": [],
+  "menus": [
+    {
+      "title": "CRM",
+      "url": "/admin/r/crm",
+      "icon": "\ud83d\udce6"
+    }
+  ],
+  "permissions": [
+    "crm.view",
+    "crm.manage"
+  ]
+}

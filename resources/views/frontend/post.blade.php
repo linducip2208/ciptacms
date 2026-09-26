@@ -1,0 +1,1 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>{{ $post->title }}</title><script src="https://cdn.tailwindcss.com"></script></head><body class="max-w-3xl mx-auto p-6"><a href="/blog">← Blog</a><h1 class="text-3xl font-bold my-3">{{ $post->title }}</h1><div class="prose max-w-none">{!! $post->body !!}</div></body></html>
