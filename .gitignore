@@ -20,6 +20,8 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/app/.license.lock
+/storage/app/lindu/license.json
 /vendor
 _ide_helper.php
 Homestead.json

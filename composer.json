@@ -1,10 +1,16 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "linducms/cms",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
-    "license": "MIT",
+    "description": "Lindu CMS — a commercial-grade, white-label company CMS built on Laravel. Ships a page builder, form builder, data builder, menu/module/plugin/theme engines, SEO, media, API and webhooks.",
+    "keywords": ["cms", "laravel", "page-builder", "form-builder", "white-label", "headless", "saas"],
+    "homepage": "https://linducms.io",
+    "license": "proprietary",
+    "support": {
+        "docs": "https://linducms.io/docs",
+        "issues": "https://github.com/linducip2208/ciptacms/issues",
+        "source": "https://github.com/linducip2208/ciptacms"
+    },
     "require": {
         "php": "^8.3",
         "bacon/bacon-qr-code": "^3.1",
@@ -49,6 +55,13 @@
         ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",
+            "@php artisan test"
+        ],
+        "lint:blade": "@php tools/blade-lint.php",
+        "lint:routes": "@php tools/route-lint.php",
+        "check": [
+            "@lint:blade",
+            "@lint:routes",
             "@php artisan test"
         ],
         "post-autoload-dump": [

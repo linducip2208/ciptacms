@@ -23,4 +23,29 @@ return [
     'security' => ['max_login_attempts' => 5, 'lockout_minutes' => 15, '2fa_enabled' => false],
     'backup' => ['disk' => 'local', 'keep' => 7],
     'updates' => ['channel' => env('LINDU_UPDATE_CHANNEL','stable'), 'endpoint' => env('LINDU_UPDATE_URL','')],
+
+    /*
+     | License verification provider. Leave empty to use the local
+     | license file + activations table only. A provider is any class
+     | implementing App\Core\Contracts\LicenseProvider.
+     */
+    'license' => [
+        'provider' => env('LINDU_LICENSE_PROVIDER', ''),
+    ],
+
+    /*
+     | Payment adapters. Each entry maps a gateway key to a class
+     | implementing App\Core\Contracts\PaymentGateway. The CMS ships
+     | the interface only — wiring a real gateway is module work.
+     */
+    'payments' => [
+        'currency' => env('LINDU_CURRENCY', 'IDR'),
+        'adapters' => [
+            'xendit'  => \App\Core\Services\Payments\XenditGateway::class,
+            'ipaymu'  => \App\Core\Services\Payments\IpaymuGateway::class,
+            'tripay'  => \App\Core\Services\Payments\TripayGateway::class,
+            'stripe'  => \App\Core\Services\Payments\StripeGateway::class,
+            'generic' => \App\Core\Services\Payments\GenericGateway::class,
+        ],
+    ],
 ];

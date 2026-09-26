@@ -1,0 +1,39 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "snapshot": false,
+
+  // Auto-approve tool use so work is not interrupted by permission prompts.
+  //
+  // NOTE: keys must be unique. Declaring "bash" twice silently drops the first
+  // one (later key wins), which is how the destructive-command carve-out below
+  // was initially lost.
+  "permission": {
+    "read": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "edit": "allow",
+    "todowrite": "allow",
+    "todoread": "allow",
+    "task": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "skill": "allow",
+    "lsp": "allow",
+
+    // Destructive operations still ask.
+    "bash": {
+      "*": "allow",
+      "git push*": "allow",
+      "git commit*": "allow",
+      "git reset --hard*": "ask",
+      "git clean*": "ask",
+      "rm -rf*": "ask",
+      "composer remove*": "ask",
+      "npm uninstall*": "ask"
+    },
+
+    // Anything outside the workspace still asks.
+    "external_directory": "ask"
+  }
+}

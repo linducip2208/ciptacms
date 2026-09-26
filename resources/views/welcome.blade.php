@@ -4,9 +4,13 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'Lindu CMS') }}</title>
 
-        @fonts
+        {{-- Laravel's skeleton welcome page uses a @fonts directive that this
+             project never registers. Fonts ship through the Vite bundle
+             (laravel-vite-plugin + Bunny self-hosted Instrument Sans), so the
+             @vite() call below is what actually loads them. --}}
+        <link rel="icon" href="/favicon.ico">
 
         <!-- Styles / Scripts -->
         @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))

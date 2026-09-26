@@ -1,0 +1,38 @@
+{
+  "name": "Company Profile",
+  "slug": "company-profile",
+  "version": "1.0.0",
+  "author": "Lindu",
+  "description": "Company website: about, services, products, portfolio, team, testimonials, clients, FAQ, gallery, careers and contact — all database driven.",
+  "dependencies": [],
+  "menus": [
+    {
+      "title": "Company Profile",
+      "icon": "ti ti-building",
+      "children": [
+        { "title": "Home", "url": "/admin/company", "icon": "ti ti-home" },
+        { "title": "About", "url": "/admin/company/about", "icon": "ti ti-info-circle" },
+        { "title": "Services", "url": "/admin/company/data/services", "icon": "ti ti-tools" },
+        { "title": "Products", "url": "/admin/company/data/products", "icon": "ti ti-package" },
+        { "title": "Portfolio", "url": "/admin/company/data/portfolio", "icon": "ti ti-briefcase" },
+        { "title": "Team", "url": "/admin/company/data/team", "icon": "ti ti-users" },
+        { "title": "Testimonials", "url": "/admin/company/data/testimonials", "icon": "ti ti-star" },
+        { "title": "Clients", "url": "/admin/company/data/clients", "icon": "ti ti-building-skyscraper" },
+        { "title": "FAQ", "url": "/admin/company/data/faqs", "icon": "ti ti-help-circle" },
+        { "title": "Gallery", "url": "/admin/company/albums", "icon": "ti ti-photo" },
+        { "title": "Careers", "url": "/admin/company/data/careers", "icon": "ti ti-briefcase" },
+        { "title": "Messages", "url": "/admin/company/messages", "icon": "ti ti-mail" },
+        { "title": "Applications", "url": "/admin/company/applications", "icon": "ti ti-file-description" },
+        { "title": "Settings", "url": "/admin/company/contact", "icon": "ti ti-settings" }
+      ]
+    }
+  ],
+  "permissions": [
+    "company.view",
+    "company.manage"
+  ],
+  "events": [
+    "contact.message",
+    "job.application"
+  ]
+}

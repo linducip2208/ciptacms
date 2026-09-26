@@ -9,6 +9,7 @@ class MediaService {
     public function store(UploadedFile $file, ?string $folderId=null, ?string $tenantId=null, bool $async=true): MediaFile {
         $max = (int)config('lindu.media.max_upload_mb',10);
         if ($file->getSize() > $max*1024*1024) throw new \RuntimeException("File exceeds {$max}MB");
+        $this->assertAllowed($file);
         $disk = config('lindu.media.disk','public');
         $path = $file->store('media/'.date('Y/m'), $disk);
         $meta = ['original'=>$file->getClientOriginalName(),'mime'=>$file->getMimeType(),'size'=>$file->getSize()];
@@ -28,6 +29,58 @@ class MediaService {
         }
         return $row->fresh();
     }
+
+    /**
+     * Reject anything outside the configured allowlist.
+     *
+     * The client-supplied extension is never trusted on its own: a `.png`
+     * containing PHP is the classic bypass. Both the sniffed MIME type and the
+     * extension are checked, and a mismatch between them is refused outright.
+     */
+    protected function assertAllowed(UploadedFile $file): void
+    {
+        $allowed = array_map('strtolower', (array) config('lindu.media.allowed_mimes', []));
+        if ($allowed === []) {
+            return;
+        }
+
+        $extension = strtolower((string) $file->getClientOriginalExtension());
+
+        // Strip the sub-type: image/jpeg -> jpeg, application/pdf -> pdf.
+        $mime = strtolower((string) $file->getMimeType());
+        $detected = str_contains($mime, '/') ? substr($mime, strpos($mime, '/') + 1) : $mime;
+
+        // svg+xml, application/vnd.ms-excel, text/plain etc. are mapped to the
+        // extension an operator would actually list in the allowlist.
+        $aliases = [
+            'svg+xml' => 'svg', 'jpeg' => 'jpg', 'vnd.ms-excel' => 'xls',
+            'vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+            'vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+            'vnd.ms-word' => 'doc', 'vnd.oasis.opendocument.text' => 'odt',
+            'x-zip-compressed' => 'zip', 'plain' => 'txt', 'csv' => 'csv',
+        ];
+        $detected = $aliases[$detected] ?? $detected;
+
+        $inList = fn (string $ext) => in_array($ext, $allowed, true);
+
+        if ($inList($extension) && $inList($detected)) {
+            return;
+        }
+
+        // A declared octet-stream tells us nothing; fall back to the
+        // extension, which is all the server can go on for that upload.
+        if ($mime === 'application/octet-stream' && $inList($extension)) {
+            return;
+        }
+
+        throw new \RuntimeException(sprintf(
+            'File type not allowed: %s (detected %s). Allowed: %s',
+            $extension ?: 'unknown',
+            $mime ?: 'unknown',
+            implode(', ', $allowed)
+        ));
+    }
+
     public function process(MediaFile $f): MediaFile {
         try {
             if (!str_starts_with((string)$f->mime,'image')) { $f->update(['status'=>'ready']); return $f; }

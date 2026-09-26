@@ -18,5 +18,8 @@ protected $casts = [
     'data' => 'array',
 ];
 
-
+    public function form()
+    {
+        return $this->belongsTo(Form::class);
+    }
 }

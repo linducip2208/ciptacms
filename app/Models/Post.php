@@ -5,7 +5,7 @@
     use Illuminate\Database\Eloquent\SoftDeletes;
     class Post extends Model
     {
-        use HasFactory;
+        use HasFactory, SoftDeletes;
         use \App\Core\Traits\Auditable;
     protected $fillable = [
         'tenant_id',
