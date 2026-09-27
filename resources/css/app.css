@@ -244,6 +244,26 @@
     font-weight: 600;
 }
 
+/*
+| Tabler / Tailwind name collisions
+|--------------------------------------------------------------------------
+| Tailwind v4 ships a `collapse` utility (`visibility: collapse`) whose name is
+| identical to Tabler's `.collapse` component. Tailwind's rules live in
+| `@layer utilities`, which beats Tabler, so every element carrying
+| `class="collapse"` — the admin sidebar, the public navbar, the FAQ and
+| careers accordions — was laid out but never painted. The links measured
+| with a real browser had a bounding box and still showed nothing on screen.
+|
+| Every `collapse` in this codebase means the Tabler component (verified
+| across all templates), so restoring visibility here is correct. This rule
+| is unlayered, so it wins over the Tailwind utility.
+|
+| CollisionTest fails if a Tabler component class starts being shadowed again.
+*/
+.collapse {
+    visibility: visible;
+}
+
 /* Utilities the templates share, kept here so pages carry no bespoke CSS. */
 
 /* Small uppercase label used for column headings and meta. */

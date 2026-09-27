@@ -1,0 +1,268 @@
+{
+    "base": "http:\/\/127.0.0.1:8123",
+    "captured": 52,
+    "expected": 52,
+    "problems": [],
+    "results": [
+        {
+            "page": "home",
+            "width": 1920,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/home--desktop-1920.png"
+        },
+        {
+            "page": "about",
+            "width": 1920,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/about--desktop-1920.png"
+        },
+        {
+            "page": "services",
+            "width": 1920,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/services--desktop-1920.png"
+        },
+        {
+            "page": "products",
+            "width": 1920,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/products--desktop-1920.png"
+        },
+        {
+            "page": "portfolio",
+            "width": 1920,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/portfolio--desktop-1920.png"
+        },
+        {
+            "page": "team",
+            "width": 1920,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/team--desktop-1920.png"
+        },
+        {
+            "page": "testimonials",
+            "width": 1920,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/testimonials--desktop-1920.png"
+        },
+        {
+            "page": "clients",
+            "width": 1920,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/clients--desktop-1920.png"
+        },
+        {
+            "page": "faq",
+            "width": 1920,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/faq--desktop-1920.png"
+        },
+        {
+            "page": "gallery",
+            "width": 1920,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/gallery--desktop-1920.png"
+        },
+        {
+            "page": "careers",
+            "width": 1920,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/careers--desktop-1920.png"
+        },
+        {
+            "page": "blog",
+            "width": 1920,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/blog--desktop-1920.png"
+        },
+        {
+            "page": "contact",
+            "width": 1920,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/contact--desktop-1920.png"
+        },
+        {
+            "page": "home",
+            "width": 1366,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/home--laptop-1366.png"
+        },
+        {
+            "page": "about",
+            "width": 1366,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/about--laptop-1366.png"
+        },
+        {
+            "page": "services",
+            "width": 1366,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/services--laptop-1366.png"
+        },
+        {
+            "page": "products",
+            "width": 1366,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/products--laptop-1366.png"
+        },
+        {
+            "page": "portfolio",
+            "width": 1366,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/portfolio--laptop-1366.png"
+        },
+        {
+            "page": "team",
+            "width": 1366,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/team--laptop-1366.png"
+        },
+        {
+            "page": "testimonials",
+            "width": 1366,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/testimonials--laptop-1366.png"
+        },
+        {
+            "page": "clients",
+            "width": 1366,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/clients--laptop-1366.png"
+        },
+        {
+            "page": "faq",
+            "width": 1366,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/faq--laptop-1366.png"
+        },
+        {
+            "page": "gallery",
+            "width": 1366,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/gallery--laptop-1366.png"
+        },
+        {
+            "page": "careers",
+            "width": 1366,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/careers--laptop-1366.png"
+        },
+        {
+            "page": "blog",
+            "width": 1366,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/blog--laptop-1366.png"
+        },
+        {
+            "page": "contact",
+            "width": 1366,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/contact--laptop-1366.png"
+        },
+        {
+            "page": "home",
+            "width": 768,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/home--tablet-768.png"
+        },
+        {
+            "page": "about",
+            "width": 768,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/about--tablet-768.png"
+        },
+        {
+            "page": "services",
+            "width": 768,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/services--tablet-768.png"
+        },
+        {
+            "page": "products",
+            "width": 768,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/products--tablet-768.png"
+        },
+        {
+            "page": "portfolio",
+            "width": 768,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/portfolio--tablet-768.png"
+        },
+        {
+            "page": "team",
+            "width": 768,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/team--tablet-768.png"
+        },
+        {
+            "page": "testimonials",
+            "width": 768,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/testimonials--tablet-768.png"
+        },
+        {
+            "page": "clients",
+            "width": 768,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/clients--tablet-768.png"
+        },
+        {
+            "page": "faq",
+            "width": 768,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/faq--tablet-768.png"
+        },
+        {
+            "page": "gallery",
+            "width": 768,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/gallery--tablet-768.png"
+        },
+        {
+            "page": "careers",
+            "width": 768,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/careers--tablet-768.png"
+        },
+        {
+            "page": "blog",
+            "width": 768,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/blog--tablet-768.png"
+        },
+        {
+            "page": "contact",
+            "width": 768,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/contact--tablet-768.png"
+        },
+        {
+            "page": "home",
+            "width": 390,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/home--mobile-390.png"
+        },
+        {
+            "page": "about",
+            "width": 390,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/about--mobile-390.png"
+        },
+        {
+            "page": "services",
+            "width": 390,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/services--mobile-390.png"
+        },
+        {
+            "page": "products",
+            "width": 390,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/products--mobile-390.png"
+        },
+        {
+            "page": "portfolio",
+            "width": 390,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/portfolio--mobile-390.png"
+        },
+        {
+            "page": "team",
+            "width": 390,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/team--mobile-390.png"
+        },
+        {
+            "page": "testimonials",
+            "width": 390,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/testimonials--mobile-390.png"
+        },
+        {
+            "page": "clients",
+            "width": 390,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/clients--mobile-390.png"
+        },
+        {
+            "page": "faq",
+            "width": 390,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/faq--mobile-390.png"
+        },
+        {
+            "page": "gallery",
+            "width": 390,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/gallery--mobile-390.png"
+        },
+        {
+            "page": "careers",
+            "width": 390,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/careers--mobile-390.png"
+        },
+        {
+            "page": "blog",
+            "width": 390,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/blog--mobile-390.png"
+        },
+        {
+            "page": "contact",
+            "width": 390,
+            "file": "D:\\project laravel\\ciptacms\\storage\\screenshots\/contact--mobile-390.png"
+        }
+    ]
+}
