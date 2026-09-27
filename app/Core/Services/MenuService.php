@@ -11,8 +11,11 @@ class MenuService {
             $q = MenuItem::where('location',$location)->where('is_visible',true)->orderBy('sort_order');
             if (app()->bound('tenant') && app('tenant')) $q->where(fn($w)=>$w->whereNull('tenant_id')->orWhere('tenant_id', app('tenant')->id));
             $items = $q->get();
+            // Keep the unfiltered set: nest() needs it to tell "this group had
+            // children that were all filtered out" from "never had children".
+            $all = $items;
             $items = $items->filter(fn($i)=>$this->visible($i,$user));
-            return $this->nest($items);
+            return $this->nest($items, null, $all);
         });
     }
     protected function visible($item, $user): bool {
@@ -20,10 +23,19 @@ class MenuService {
         if ($item->roles) { $roles = is_array($item->roles)?$item->roles:json_decode($item->roles,true); if($roles && (!$user || !$user->roles()->whereIn('slug',$roles)->exists())) return false; }
         return true;
     }
-    protected function nest($items, $parent=null): array {
+    protected function nest($items, $parent=null, $all=null): array {
         $out=[];
         foreach ($items->where('parent_id',$parent) as $it) {
-            $n=$it->toArray(); $n['children']=$this->nest($items,$it->id);
+            $n=$it->toArray(); $n['children']=$this->nest($items,$it->id,$all);
+
+            // Drop a group whose children were all filtered out by permission,
+            // otherwise the sidebar shows a heading with nothing under it.
+            // children stays an array: admin/partials/menu-tree iterates it.
+            $hadChildren = collect($all ?? $items)->contains(fn ($c) => (int) $c->parent_id === (int) $it->id);
+            if ($hadChildren && $n['children'] === []) {
+                continue;
+            }
+
             $n['active']=request()->is(ltrim((string)($it->url??''),'/').'*') || request()->routeIs($it->route??'__none__');
             $out[]=$n;
         }

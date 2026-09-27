@@ -26,9 +26,27 @@ class RolesPermissionsSeeder extends Seeder {
             ['system','roles','Roles',['view','create','read','update','delete','manage','configure']],
             ['system','settings','Settings',['view','update','configure','manage']],
             ['system','modules','Modules',['view','manage','configure']],
-            ['saas','tenants','Tenants',['view','create','read','update','delete','manage','configure']],
-            ['saas','billing','Billing',['view','manage','configure','export']],
-        ];
+        ['saas','tenants','Tenants',['view','create','read','update','delete','manage','configure']],
+        ['saas','billing','Billing',['view','manage','configure','export']],
+
+        // Permissions the admin sidebar already guards its menu items with.
+        // Without a matching row, MenuService::visible() hides the whole
+        // section from every role except admin, which bypasses via hasRole().
+        // MenuPermissionTest fails if any menu guard is missing here.
+        ['cms','categories','Categories',['view','create','read','update','delete','manage']],
+        ['cms','tags','Tags',['view','create','read','update','delete','manage']],
+        ['cms','comments','Comments',['view','create','read','update','delete','manage','approve']],
+        ['cms','content-types','Content types',['view','create','update','delete','manage','configure']],
+        ['cms','content-records','Content records',['view','create','read','update','delete','manage','export','import']],
+        ['cms','workflows','Workflows',['view','create','update','delete','manage','configure']],
+        ['cms','webhooks','Webhooks',['view','create','update','delete','manage','export']],
+        ['appearance','themes','Themes',['view','create','update','delete','manage','configure']],
+        ['appearance','plugins','Plugins',['view','create','update','delete','manage','configure']],
+        ['appearance','widgets','Widgets',['view','create','update','delete','manage']],
+        ['system','notifications','Notifications',['view','create','update','delete','manage']],
+        ['system','tasks','Tasks',['view','create','update','delete','manage']],
+        ['system','system','System',['view','manage','configure']],
+    ];
         foreach($defs as [$g,$mod,$label,$actions]){
             $grp = PermissionGroup::where('slug',$g)->first();
             foreach($actions as $a){ Permission::firstOrCreate(['slug'=>"{$mod}.{$a}"],['group_id'=>$grp?->id,'name'=>"{$label} ".ucfirst($a),'action'=>$a,'module'=>$mod]); }
