@@ -29,10 +29,15 @@ class TailwindTablerCollisionTest extends TestCase
     /**
      * Tabler components that must remain visible. Each of these was, at some
      * point, shadowed by a Tailwind utility of the same name.
+     *
+     * A data provider must yield an array of arguments per case, so each
+     * value is ['purpose'], not a bare string — otherwise PHPUnit reports
+     * "expected array but got string" and poisons the exit code of every
+     * filtered run.
      */
     public static function criticalComponents(): array
     {
-        return [
+        $components = [
             'navbar' => 'top navigation',
             'collapse' => 'the JS collapse component (navbar, sidebar, accordions)',
             'dropdown-menu' => 'navigation dropdowns',
@@ -41,6 +46,17 @@ class TailwindTablerCollisionTest extends TestCase
             'accordion' => 'FAQ and careers accordions',
             'modal' => 'admin modals',
         ];
+
+        // Each value must be the full argument list for the test method, and
+        // the class is the first argument. A bare string here makes PHPUnit
+        // report "expected array but got string" and poisons the exit code of
+        // every filtered run.
+        $out = [];
+        foreach ($components as $class => $purpose) {
+            $out[$class] = [$class, $purpose];
+        }
+
+        return $out;
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('criticalComponents')]
@@ -54,13 +70,12 @@ class TailwindTablerCollisionTest extends TestCase
             $class.' ('.$purpose.') is missing from the bundle entirely'
         );
 
-        // A utility layer rule that sets visibility:hidden/collapse on this
-        // exact class would silently make it disappear at paint time.
-        $this->assertDoesNotMatchRegularExpression(
-            '/\.'.preg_quote($class, '/').'\{[^}]*visibility:\s*(hidden|collapse)/',
-            $css,
-            $class.' ('.$purpose.') is shadowed by a Tailwind utility that hides it'
-        );
+        // Shadow detection is deliberately NOT done with a whole-bundle
+        // regex here: Tabler ships its own `visibility:hidden` rules on
+        // purpose (an offcanvas is hidden until .show). Scanning everything
+        // cannot tell a legitimate component rule from a utility shadowing
+        // it. test_no_other_component_is_hidden_by_a_utility isolates the
+        // Tailwind utilities layer and does that job correctly.
     }
 
     public function test_collapse_is_explicitly_restored(): void
@@ -122,7 +137,6 @@ class TailwindTablerCollisionTest extends TestCase
         preg_match_all('/\.([a-z0-9-]+)\{[^}]*visibility:\s*(?:hidden|collapse)/i', $utilities, $m);
 
         $tablerComponents = array_keys(self::criticalComponents());
-
         /**
          * Collisions that exist and are handled by an explicit unlayered
          * override in app.css, with the reason. Adding a name here without

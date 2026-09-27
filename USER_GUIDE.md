@@ -188,18 +188,26 @@ All three screens behave the same way:
 
 | What you want to do | How |
 |---|---|
-| Add something | **Create** / **Add** |
-| Change something | Click the item's name |
-| Hide it without deleting it | Set it to **Draft** |
-| Change the order | Use the up and down arrows, or drag them |
-| Make a copy to start from | **Duplicate** |
+| Add something | **+ Add** (top right) |
+| Change something | **Edit** on the row |
+| Hide it without deleting it | **Publish / Draft** toggle on the row |
+| Make a copy to start from | **Copy** on the row |
 | Get rid of something | **Delete** — this moves it to the bin first |
+| Find something | the search box and the Published/Draft filter |
+
+There is no drag-to-reorder and no sortable column headings on these lists —
+the rows appear alphabetically, and the screens do accept `?sort=` and
+`?dir=asc` in the web address if someone technical sorts them for you, but
+there is no button to do it. If the order on your website matters, say so and
+ask your administrator to set it.
 
 ### Deleted items
 
-Deleted items are not destroyed straight away. They go to **Content → Trash**,
-where you can put them back, or delete them for good. This is deliberate: a
-mistaken delete is recoverable.
+Deleted items are not destroyed straight away. Each company list has a
+**Trash** link at the top, and everything you have deleted from that list is
+waiting there — you can put it back, or delete it for good. This is
+deliberate: a mistaken delete is recoverable. Pages and posts you delete go to
+**Content → Trash** instead.
 
 ---
 
@@ -272,8 +280,8 @@ footer, and the contact block on any page you build.
 
 Go to **Media → Library**.
 
-- Drag files onto the page, or use the upload button.
-- You can upload more than one file at a time.
+- Choose your files (you can pick more than one at a time) and press
+  **Upload**.
 - **How big?** The limit is 10 MB per file by default. Your administrator can
   raise it.
 - The library shows the pictures, documents and videos separately, and you can
@@ -322,8 +330,7 @@ sign-up. Go to **Forms → Forms** and add one.
    ones that accept a file.
 3. Fill in the help text and the placeholder for each field. Placeholder text
    is the grey hint that disappears when someone starts typing.
-4. Drag the fields into the order you want them, and use the up and down
-   arrows if you prefer.
+4. Drag the fields into the order you want them.
 5. Set the message visitors see after they press Send.
 6. Put the form on a page: add the **Form** piece from the page editor's
    toolbox, then choose which form it should be.
@@ -345,29 +352,52 @@ because it was never given a web address. Check both first.
 
 Go to **Appearance → Menus**.
 
-You will see two lists: the menu for the admin area, and the menu for the
-website. You want the second one.
+The screen shows one menu at a time, chosen by the `?location=` part of the
+address:
 
-To add an item, fill in the small form and press Add:
+| `location=` | What it controls |
+|---|---|
+| `admin` | the sidebar you are looking at right now — leave it alone |
+| `primary` | **the menu along the top of the website and the links in the footer** — this is the one you want |
+| `footer` | nothing. It is saved and never shown anywhere. Ignore it. |
+
+To add a top-level item quickly, fill in the small form at the top of the list
+(**Title**, **URL**, **Icon**, **Permission**) and press **Add**.
+
+To do more — set a parent, a sort position, whether the item is visible, a
+badge, or open in a new tab — use the full form at
+`/admin/menus/create?location=primary`:
 
 - **Title** — the words people see.
 - **URL** — where the link goes. Type it as `/services`, not as the whole
-  `https://…` address.
+  `https://…` address. (You can use a named route instead, but a plain path is
+  easier.)
 - **Parent** — leave this empty for a top-level item, or choose another item to
-  make this one sit inside it. You can have as many levels as you like.
+  make this one sit inside it. Top-level items with children turn into
+  drop-downs.
 - **Sort order** — smaller numbers appear first.
 - **Visible** — untick it to hide the item without deleting it.
+- **Badge** — a small coloured label next to the item.
 
 **Things that surprise people:**
 
 - There is no drag-and-drop for menus. The sort order and parent fields are
-  how you arrange them.
+  how you arrange them, and there is no edit button on each row — you edit by
+  opening the item's address.
+- If you make an item its own parent by accident, the site refuses and tells
+  you so. Good.
+- You cannot delete a group that still has items inside it. Move or delete them
+  first.
+- Deleting a menu item really deletes it. There is no bin.
 - The list updates straight away in the browser, but the website itself may
   take up to two minutes to catch up, because the menu is cached. If it seems
   stuck, wait and refresh.
 - An item can be marked as a **button** instead of a plain link, which is how
   the "Contact" link at the end of the menu is styled. Your administrator can
   change that.
+- The footer shows only the **first three** groups on the menu that have items
+  in them, plus a contact column. If you add a fourth top-level group, it may
+  appear in the menu but not in the footer.
 - Some menu entries are created by modules, and they disappear if the module is
   switched off. That is not something you broke.
 
