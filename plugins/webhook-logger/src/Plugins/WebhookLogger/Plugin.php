@@ -107,6 +107,9 @@ class Plugin implements PluginInterface
                 ],
             ]);
         } catch (\Throwable $e) {
+            // The delivery path must not lose the record silently, but a
+            // failure here has to be visible somewhere other than the log the
+            // caller is already writing.
             report($e);
         }
     }

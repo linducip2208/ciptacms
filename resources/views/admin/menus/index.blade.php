@@ -5,5 +5,13 @@
 <div class="card"><div class="table-responsive"><table class="table table-vcenter card-table"><thead><tr><th>#</th><th>Title</th><th>URL/Route</th><th>Permission</th><th>Sort</th><th>Visible</th><th></th></tr></thead><tbody>
 @foreach($items as $it)<tr><td>{{ $it->id }}</td><td>{{ str_repeat('— ',0) }}{{ $it->title }}</td><td>{{ $it->url }}{{$it->route}}</td><td><span class="badge">{{ $it->permission }}</span></td><td>{{ $it->sort_order }}</td><td>{{ $it->is_visible?'yes':'no' }}</td>
 <td><form method="POST" action="{{ route('admin.menus.destroy',$it) }}">@csrf @method('DELETE')<button class="text-rose-600 text-sm">Delete</button></form></td></tr>@endforeach
+@include('admin.partials.empty-row', [
+    'count' => $items->count(),
+    'attributes' => new \Illuminate\View\ComponentAttributeBag(['colspan' => 7]),
+    'icon' => 'ti-menu-2',
+    'title' => 'The '.ucfirst($location).' menu is empty',
+    'message' => 'Nothing renders at this location yet. Add the first entry with the form above.',
+    'action' => ['label' => 'Add menu item', 'url' => route('admin.menus.create', ['location' => $location])],
+])
 </tbody></table></div>
 @endsection

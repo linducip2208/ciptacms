@@ -189,23 +189,38 @@ class BundledPluginsTest extends TestCase
     }
 
     /**
-     * KNOWN GAP: the manager registers the listener and a direct invocation
-     * of the plugin's handler works, but firing webhook.delivered through the
-     * framework dispatcher does not reach it under the test harness. Narrowed
-     * to: a listener registered by ensureBooted() does not fire, while one
-     * registered directly in the same test does, and the dispatcher itself is
-     * proven healthy. Not yet root-caused.
+     * KNOWN GAP — plugin event hooks are not yet proven end to end.
      *
-     * Until it is, the bundled plugins' hooks must not be advertised as
-     * end-to-end working. The handler behaviour is covered by the tests above.
+     * Everything around the dispatch is verified: the listener is registered,
+     * the dispatcher performs the delivery, a second listener on the same
+     * event fires, and calling the plugin's handler directly records the
+     * row. The one link that does not hold is the registered listener not
+     * running when the real dispatcher fires the event. Not yet root-caused.
+     *
+     * These assertions pin the working parts so the gap cannot be mistaken
+     * for "the plugin is broken", and the handler tests above cover the
+     * plugin's own code.
      */
-    public function test_hook_listener_is_registered(): void
+    public function test_the_dispatcher_delivers_but_the_hook_is_unproven(): void
     {
         $this->activate('webhook-logger');
+        Http::fake(['*' => Http::response('ok', 200)]);
 
+        $hook = Webhook::create([
+            'name' => 'Partner', 'event' => 'order.paid',
+            'url' => 'https://partner.test/hook', 'secret' => 's3cret',
+            'is_active' => true, 'timeout' => 5,
+        ]);
+
+        $result = app(WebhookDispatcher::class)->send($hook, ['order_id' => 7]);
+
+        // The delivery itself is real.
+        $this->assertSame('delivered', $result->status);
+        $this->assertSame(200, $result->response_status);
+
+        // A listener is registered for the event the dispatcher fires.
         $this->assertTrue(
-            \Illuminate\Support\Facades\Event::hasListeners('webhook.delivered'),
-            'the plugin manager did not register a listener for webhook.delivered'
+            \Illuminate\Support\Facades\Event::hasListeners('webhook.delivered')
         );
     }
 
