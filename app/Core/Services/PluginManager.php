@@ -505,10 +505,20 @@ class PluginManager
     /* ------------------------------------------------------------------ */
 
     /** Drop per-request caches so a lifecycle change is visible immediately. */
+    /**
+     * Drop every piece of cached plugin state.
+     *
+     * This must also clear `booted` and the registered-hook map. Clearing
+     * only the instances left `booted` true, so ensureBooted() returned
+     * early for the rest of the process and a plugin activated at runtime
+     * never got its hooks registered.
+     */
     public function flush(): void
     {
         $this->loader->flush();
         $this->active = null;
+        $this->booted = false;
+        $this->registered = [];
     }
 
     protected function requireManifest(string $slug): array

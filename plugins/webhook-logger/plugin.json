@@ -3,11 +3,8 @@
   "slug": "webhook-logger",
   "version": "1.0.0",
   "author": "Lindu",
-  "description": "Logs outgoing webhooks",
-  "hooks": [
-    "page.rendered"
-  ],
-  "filters": [
-    "seo.meta"
-  ]
+  "description": "Writes one activity-log entry per outgoing webhook delivery, calling out failures so a broken endpoint is visible in the admin instead of buried in webhook_logs.",
+  "class": "Plugins\\WebhookLogger\\Plugin",
+  "filters": [],
+  "hooks": ["webhook.delivered", "webhook.failed"]
 }

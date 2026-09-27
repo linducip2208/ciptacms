@@ -11,7 +11,15 @@ class LinduCoreProvider extends ServiceProvider {
     }
     public function boot(): void {
         try { app(ModuleManager::class)->syncRegistry(); } catch(\Throwable $e){}
-        try { app(PluginManager::class)->syncRegistry(); } catch(\Throwable $e){}
+        try {
+            $plugins = app(PluginManager::class);
+            $plugins->syncRegistry();
+            // Register plugin event hooks. Without this nothing ever calls
+            // ensureBooted() during a normal request — applyFilter() and
+            // dispatchHook() do, but the framework's own event() does not —
+            // so every hook a plugin declared would silently never fire.
+            $plugins->ensureBooted();
+        } catch(\Throwable $e){}
         try { app(ThemeManager::class)->syncRegistry(); } catch(\Throwable $e){}
     }
 }

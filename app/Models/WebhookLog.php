@@ -14,6 +14,9 @@ protected $fillable = [
     'status',
     'attempts',
     'response',
+    'response_status',
+    'error',
+    'delivered_at',
     'next_retry_at',
 ];
 protected $casts = [

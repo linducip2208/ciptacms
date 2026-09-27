@@ -1,13 +1,10 @@
 {
-  "name": "WhatsApp Bridge (ready)",
+  "name": "WhatsApp Bridge",
   "slug": "whatsapp-bridge",
   "version": "1.0.0",
   "author": "Lindu",
-  "description": "Adapter-ready for WA gateway",
-  "hooks": [
-    "page.rendered"
-  ],
-  "filters": [
-    "seo.meta"
-  ]
+  "description": "Sends text messages through the WhatsApp Business Cloud API and can notify a number when a contact form is submitted. Configure whatsapp.phone_number_id and whatsapp.access_token in settings.",
+  "class": "Plugins\\WhatsAppBridge\\Plugin",
+  "filters": ["whatsapp.link"],
+  "hooks": ["contact.message"]
 }
