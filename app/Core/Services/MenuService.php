@@ -30,4 +30,21 @@ class MenuService {
         return $out;
     }
     public static function forget(): void { \Illuminate\Support\Facades\Cache::flush(); }
+
+    /**
+     * Public URL of a published page by slug, or null when it does not exist.
+     *
+     * Lets the footer link Privacy and Terms only when an operator has
+     * actually published them, instead of 404ing for every install.
+     */
+    public static function pageUrl(string $slug): ?string
+    {
+        try {
+            $exists = \App\Models\Page::published()->where('slug', $slug)->exists();
+
+            return $exists ? url('/p/'.$slug) : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
 }

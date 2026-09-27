@@ -1,58 +1,89 @@
 @extends('site.layout')
-@section('title', $seo['title'] ?? $item->title)
+@section('title', ($seo['title'] ?? $item->title) . ' — ' . setting('general.site_name', 'Lindu CMS'))
+@section('description', $seo['description'] ?? \Illuminate\Support\Str::limit(strip_tags((string) $item->excerpt), 160))
 
 @section('content')
-<div class="wrap">
-    {!! app(\App\Core\Services\SeoService::class)->breadcrumb([
-        ['name' => 'Home', 'url' => route('site.home')],
-        ['name' => 'Products', 'url' => route('site.products')],
-        ['name' => $item->title],
-    ]) !!}
-</div>
+    <div class="border-bottom">
+        <div class="container-xl py-3">
+            <x-site.breadcrumbs :items="[
+                ['label' => 'Home', 'url' => route('site.home')],
+                ['label' => 'Products', 'url' => route('site.products')],
+                ['label' => $item->title],
+            ]" />
+        </div>
+    </div>
 
-<section style="padding-top:24px">
-    <div class="wrap">
-        <div class="grid" style="grid-template-columns:1fr 320px;gap:36px;align-items:start">
-            <div>
-                <h1 class="page-title">{{ $item->title }}</h1>
-                @if($item->image)
-                    <img src="{{ $item->image }}" alt="{{ $item->title }}" style="width:100%;border-radius:var(--lindu-radius);margin-bottom:22px">
-                @endif
-                @if($item->excerpt)<p style="font-size:1.1rem;color:#475569">{{ $item->excerpt }}</p>@endif
-                @if($item->description)<div class="prose">{!! $item->description !!}</div>@endif
+    <x-site.hero
+        :title="$item->title"
+        :subtitle="$item->excerpt"
+        :image="$item->image"
+        :cta-url="$item->cta_url"
+        :cta-label="$item->cta_label"
+    />
 
-                @if($item->features)
-                    <h3 style="margin-top:30px">Key features</h3>
-                    <ul style="padding-left:20px;color:#475569">
-                        @foreach($item->features as $f)
-                            <li>{{ is_array($f) ? ($f['title'] ?? json_encode($f)) : $f }}</li>
-                        @endforeach
-                    </ul>
+    <x-site.section>
+        <div class="row g-5">
+            <div class="col-lg-8">
+                @if (! empty($item->description))
+                    <div class="lindu-prose">{!! $item->description !!}</div>
                 @endif
 
-                @if($item->gallery)
-                    <div class="gallery-grid" style="margin-top:24px">
-                        @foreach($item->gallery as $img)
-                            <img src="{{ $img }}" alt="{{ $item->title }}" loading="lazy">
+                @if (filled($item->features))
+                    <h2 class="h3 mt-4 mb-3">Key features</h2>
+                    <div class="row g-2">
+                        @foreach ($item->features as $feature)
+                            <div class="col-md-6">
+                                <div class="d-flex gap-2 align-items-start p-2 rounded" style="background:var(--tblr-bg-surface-secondary)">
+                                    <i class="ti ti-check-circle text-success mt-1"></i>
+                                    <span>{{ is_array($feature) ? ($feature['title'] ?? '') : $feature }}</span>
+                                </div>
+                            </div>
                         @endforeach
                     </div>
                 @endif
 
-                @if($item->cta_url)
-                    <p style="margin-top:28px"><a class="btn" href="{{ $item->cta_url }}">{{ $item->cta_label ?: 'Learn more' }}</a></p>
+                @if (filled($item->gallery))
+                    <h2 class="h3 mt-5 mb-3">Gallery</h2>
+                    <div class="row g-3">
+                        @foreach ($item->gallery as $image)
+                            <div class="col-6 col-md-4">
+                                <img src="{{ $image }}" alt="{{ $item->title }}" loading="lazy" class="rounded lindu-thumb">
+                            </div>
+                        @endforeach
+                    </div>
                 @endif
             </div>
-            <aside>
-                <div class="card">
-                    <h3>Related products</h3>
-                    <ul style="list-style:none;padding:0;margin:0;display:grid;gap:10px">
-                        @foreach($related as $r)
-                            <li><a href="{{ route('site.product', $r->slug) }}">{{ $r->title }}</a></li>
-                        @endforeach
-                    </ul>
+
+            <aside class="col-lg-4">
+                <div class="card sticky-top" style="lindu-sticky-aside">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">Interested?</h2>
+                        <p class="text-secondary small">We will send pricing and next steps.</p>
+                        <a href="{{ $item->cta_url ?: route('site.contact') }}" class="btn btn-primary w-100 mb-2">
+                            {{ $item->cta_label ?: 'Enquire' }}
+                        </a>
+
+                        @if ($related->isNotEmpty())
+                            <hr>
+                            <h3 class="h6 text-secondary text-uppercase" style="lindu-micro-label">
+                                Related products
+                            </h3>
+                            <ul class="list-unstyled d-grid gap-2 mb-0">
+                                @foreach ($related as $r)
+                                    <li><a href="{{ route('site.product', $r->slug) }}" class="text-decoration-none">{{ $r->title }}</a></li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
                 </div>
             </aside>
         </div>
-    </div>
-</section>
+    </x-site.section>
+
+    <x-site.cta
+        title="Questions about this product?"
+        url="{{ route('site.contact') }}"
+        secondary-label="See all products"
+        :secondary-url="route('site.products')"
+    />
 @endsection

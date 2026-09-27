@@ -106,6 +106,95 @@ class ThemeController extends AdminController
         ],
     ];
 
+    /**
+     * Every CMS-driven design token, as a CSS custom-property block.
+     *
+     * Emitted after the stylesheet, so these win over the compiled-in
+     * defaults. This is the only place a live install's colours, fonts and
+     * spacing come from: nothing in the templates hard-codes them.
+     */
+    public static function tokenCss(): string
+    {
+        $color = static function (string $key, string $fallback): string {
+            $value = trim((string) setting($key, ''));
+            if ($value === '') {
+                return $fallback;
+            }
+            // Only accept a literal colour, never an arbitrary expression.
+            return preg_match('/^(#[0-9a-f]{3,8}|[a-z]+|rgb(a)?\([\d\s.,%]+\)|hsl(a)?\([\d\s.,%]+\))$/i', $value)
+                ? $value
+                : $fallback;
+        };
+
+        $length = static function (string $key, string $fallback): string {
+            $value = trim((string) setting($key, ''));
+
+            return preg_match('/^-?\d+(\.\d+)?(px|rem|em|%|vh|vw)$/', $value) ? $value : $fallback;
+        };
+
+        $customizer = AppearanceOption::where('group', 'customizer')->pluck('value', 'key')->all();
+
+        $tokens = [
+            '--lindu-primary' => $color('branding.primary_color', '#1d4ed8'),
+            '--lindu-secondary' => $color('branding.secondary_color', '#0f172a'),
+            '--lindu-accent' => $color('branding.accent_color', '#f59e0b'),
+            '--lindu-background' => $color('branding.background_color', '#ffffff'),
+            '--lindu-surface' => $color('branding.surface_color', '#f8fafc'),
+            '--lindu-text' => $color('branding.text_color', '#0f172a'),
+            '--lindu-muted' => $color('branding.muted_color', '#64748b'),
+            '--lindu-border' => $color('branding.border_color', '#e5e7eb'),
+            '--lindu-radius' => $length('branding.radius', '12px'),
+            '--lindu-container' => $length('branding.container_width', '1180px'),
+            '--lindu-section' => $length('branding.section_spacing', '64px'),
+            '--lindu-header-height' => $length('branding.header_height', '68px'),
+            '--lindu-footer-background' => $color('branding.footer_background', 'var(--lindu-secondary)'),
+            '--lindu-footer-text' => $color('branding.footer_text', 'rgba(255,255,255,.72)'),
+            '--lindu-font-family' => (string) (setting('branding.font_family') ?: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif'),
+            '--lindu-heading-font-family' => (string) (setting('branding.heading_font_family') ?: 'var(--lindu-font-family)'),
+            '--lindu-heading-weight' => (string) (setting('branding.heading_weight') ?: '700'),
+            '--lindu-button-weight' => (string) (setting('branding.button_weight') ?: '600'),
+        ];
+
+        $out = [];
+        foreach ($tokens as $name => $value) {
+            $out[] = "  {$name}: {$value};";
+        }
+
+        // Tabler font-size scale, when the operator tuned it.
+        foreach (['base' => '16px', 'h1' => '', 'h2' => '', 'h3' => ''] as $key => $default) {
+            $value = $length('branding.font_size_'.$key, $default);
+            if ($value !== '') {
+                $out[] = "  --lindu-font-size-{$key}: {$value};";
+            }
+        }
+
+        $body = $out ? ":root {\n".implode("\n", $out)."\n}" : '';
+
+        if ($customizer) {
+            $extra = [];
+            foreach ($customizer as $key => $value) {
+                $name = 'lindu-customizer-'.preg_replace('/[^a-z0-9-]/i', '-', (string) $key);
+                $extra[] = "  --{$name}: {$value};";
+            }
+            $body .= ($body ? "\n" : '').":root {\n".implode("\n", $extra)."\n}";
+        }
+
+        return $body;
+    }
+
+    /**
+     * The colour mode the public site should render in.
+     *
+     * Returns 'dark', 'light' or an empty string. Empty means "no opinion",
+     * which leaves the stylesheet free to follow prefers-color-scheme.
+     */
+    public static function siteColorMode(): string
+    {
+        $mode = strtolower((string) setting('theme.color_mode', 'auto'));
+
+        return in_array($mode, ['dark', 'light'], true) ? $mode : '';
+    }
+
     public function customize()
     {
         $active = Theme::where('is_active', true)->first();

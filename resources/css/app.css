@@ -1,9 +1,364 @@
+/*
+|--------------------------------------------------------------------------
+| Lindu CMS — single stylesheet for the whole product
+|--------------------------------------------------------------------------
+| Order matters and is declared once, here:
+|
+|   1. Tabler          the design foundation (components, grid, navbar, forms)
+|   2. Tailwind        the utility layer the admin templates rely on
+|   3. Design tokens   CMS branding, bridged onto Tabler's own properties
+|   4. Site components the handful of classes Tabler has no equivalent for
+|
+| The admin and the public site both load this file. Loading separate bundles
+| per layout compiled Tailwind twice and left the admin's utility classes
+| unstyled, so there is deliberately only one CSS entry.
+*/
+
+@import './tabler.css';
 @import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
+@source '../../resources/views/**/*.blade.php';
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+/*
+| Tokens written by the CMS
+|--------------------------------------------------------------------------
+| The values below are the compiled-in defaults. `ThemeController::tokenCss()`
+| appends a `:root` block built from the branding, white-label and theme
+| settings, which lands after this one and therefore wins. Nothing here is
+| the source of truth for a live install is the database is.
+*/
+:root {
+    --lindu-primary: #1d4ed8;
+    --lindu-secondary: #0f172a;
+    --lindu-accent: #f59e0b;
+    --lindu-background: #ffffff;
+    --lindu-surface: #f8fafc;
+    --lindu-text: #0f172a;
+    --lindu-muted: #64748b;
+    --lindu-border: #e5e7eb;
+    --lindu-radius: 12px;
+    --lindu-container: 1180px;
+    --lindu-section: 64px;
+    --lindu-font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --lindu-heading-font-family: var(--lindu-font-family);
+    --lindu-heading-weight: 700;
+    --lindu-button-radius: calc(var(--lindu-radius) * 0.66);
+    --lindu-button-weight: 600;
+    --lindu-header-height: 68px;
+    --lindu-footer-background: var(--lindu-secondary);
+    --lindu-footer-text: rgba(255, 255, 255, 0.72);
+
+    /* Bridge the CMS tokens onto Tabler. */
+    --tblr-primary: var(--lindu-primary);
+    --tblr-primary-rgb: 29, 78, 216;
+    --tblr-secondary: var(--lindu-secondary);
+    --tblr-body-color: var(--lindu-text);
+    --tblr-body-bg: var(--lindu-background);
+    --tblr-bg-surface-secondary: var(--lindu-surface);
+    --tblr-border-color: var(--lindu-border);
+    --tblr-border-radius: var(--lindu-radius);
+    --tblr-border-radius-sm: var(--lindu-button-radius);
+    --tblr-border-radius-lg: calc(var(--lindu-radius) * 1.5);
+    --tblr-font-sans-serif: var(--lindu-font-family);
+    --tblr-font-headings: var(--lindu-heading-font-family);
+    --tblr-font-weight-bold: var(--lindu-heading-weight);
+    --tblr-font-weight-semibold: var(--lindu-button-weight);
+    --tblr-header-height: var(--lindu-header-height);
+}
+
+/*
+| Dark theme
+|--------------------------------------------------------------------------
+| Enabled by the theme, or by the visitor's OS preference when the theme
+| does not pin a mode. Only the tokens move; every component reads them.
+*/
+[data-bs-theme='dark'] {
+    --lindu-secondary: #e2e8f0;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-bs-theme='light']) {
+        --lindu-secondary: #e2e8f0;
+    }
+}
+
+/*
+| Site shell
+|--------------------------------------------------------------------------
+| Small, deliberate additions on top of Tabler. Tabler supplies .container,
+| .row, .card, .btn, .navbar and the rest; these are only the pieces the
+| public site genuinely needs that Tabler has no equivalent for.
+*/
+.lindu-section {
+    padding-block: var(--lindu-section);
+}
+
+/* Auto-fitting grid. Components set the minimum column width and stop
+   repeating the same grid declaration in four places. */
+.lindu-auto-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--min, 260px), 1fr));
+    gap: var(--lindu-grid-gap, 1.5rem);
+}
+
+.lindu-section--tight {
+    padding-block: calc(var(--lindu-section) * 0.55);
+}
+
+.lindu-section--alt {
+    background-color: var(--tblr-bg-surface-secondary, #f8fafc);
+}
+
+.lindu-section-head {
+    max-width: 46rem;
+    margin-inline: auto;
+    margin-bottom: 2.5rem;
+    text-align: center;
+}
+
+.lindu-section-head--left {
+    margin-inline: 0;
+    text-align: left;
+}
+
+.lindu-eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tblr-primary);
+    margin-bottom: 0.5rem;
+}
+
+.lindu-prose {
+    color: var(--tblr-body-color);
+    line-height: 1.7;
+}
+
+.lindu-prose > * + * {
+    margin-top: 1.1em;
+}
+
+.lindu-prose h2,
+.lindu-prose h3,
+.lindu-prose h4 {
+    color: var(--lindu-secondary);
+    margin-top: 1.8em;
+    line-height: 1.25;
+}
+
+.lindu-prose h2:first-child,
+.lindu-prose h3:first-child {
+    margin-top: 0;
+}
+
+.lindu-prose a {
+    color: var(--tblr-primary);
+    text-decoration: none;
+}
+
+.lindu-prose a:hover {
+    text-decoration: underline;
+}
+
+.lindu-prose img,
+.lindu-prose iframe,
+.lindu-prose table {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--tblr-border-radius);
+}
+
+.lindu-prose table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.lindu-prose th,
+.lindu-prose td {
+    border: 1px solid var(--tblr-border-color);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+}
+
+.lindu-prose blockquote {
+    border-left: 3px solid var(--tblr-primary);
+    padding-left: 1rem;
+    color: var(--tblr-secondary);
+}
+
+/* Page-builder output. BlockLibrary emits these wrappers, so the builder
+   inherits the same tokens and components as the hand-written pages. */
+.lindu-block {
+    margin-bottom: 1.5rem;
+}
+
+.lindu-block:last-child {
+    margin-bottom: 0;
+}
+
+.lindu-block > * + * {
+    margin-top: 1rem;
+}
+
+.lindu-block .lindu-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.lindu-block .lindu-slider {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+}
+
+.lindu-block .lindu-slider img {
+    scroll-snap-align: start;
+    border-radius: var(--tblr-border-radius);
+}
+
+.lindu-block pre {
+    background: var(--tblr-dark, #0f172a);
+    color: var(--tblr-dark-fg, #e2e8f0);
+    padding: 1.1rem;
+    border-radius: var(--tblr-border-radius);
+    overflow: auto;
+}
+
+.lindu-block details {
+    border: 1px solid var(--tblr-border-color);
+    border-radius: var(--tblr-border-radius);
+    padding: 0.8rem 1rem;
+}
+
+.lindu-block details + details {
+    margin-top: 0.5rem;
+}
+
+.lindu-block summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Utilities the templates share, kept here so pages carry no bespoke CSS. */
+
+/* Small uppercase label used for column headings and meta. */
+.lindu-micro-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--lindu-muted);
+}
+
+/* Sticky sidebar offset so a card clears the sticky header. */
+.lindu-sticky-aside {
+    position: sticky;
+    top: calc(var(--lindu-header-height) + 1.5rem);
+}
+
+.lindu-avatar {
+    width: 7rem;
+    height: 7rem;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.lindu-avatar--sm {
+    width: 2.75rem;
+    height: 2.75rem;
+}
+
+.lindu-avatar--md {
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 0.5rem;
+}
+
+.lindu-logo-mark {
+    height: 2rem;
+    width: auto;
+}
+
+.lindu-thumb--fixed {
+    width: 4.5rem;
+    height: 3.5rem;
+    object-fit: cover;
+    border-radius: 0.5rem;
+}
+
+/* Text that sits on a dark or image background. */
+.lindu-on-dark {
+    color: #fff;
+}
+
+.lindu-on-dark-muted {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.lindu-on-accent {
+    background: #fff;
+    color: var(--tblr-primary);
+}
+
+.lindu-stat-value {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--tblr-primary);
+}
+
+.lindu-stars {
+    color: #f59e0b;
+    letter-spacing: 0.05em;
+}
+
+.lindu-thumb {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+.lindu-thumb--square {
+    aspect-ratio: 1;
+    border-radius: 50%;
+}
+
+.lindu-filterbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.lindu-filterbar a {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.85rem;
+    border: 1px solid var(--tblr-border-color);
+    border-radius: 999px;
+    font-size: 0.875rem;
+    text-decoration: none;
+    color: var(--tblr-body-color);
+}
+
+.lindu-filterbar a.is-active,
+.lindu-filterbar a:hover {
+    background: var(--tblr-primary);
+    border-color: var(--tblr-primary);
+    color: #fff;
+}
+
+@media (max-width: 767px) {
+    .lindu-section {
+        padding-block: calc(var(--lindu-section) * 0.7);
+    }
+
+    .lindu-section-head {
+        margin-bottom: 1.75rem;
+    }
 }

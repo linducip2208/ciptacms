@@ -5,7 +5,10 @@
 <link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#206bc4">
 {{-- Tabler, its icon font and Alpine are bundled locally. A CDN outage must
      not be able to take the admin panel — or the page builder — down. --}}
-@vite(['resources/css/tabler.css', 'resources/js/app.js'])
+@vite(['resources/css/app.css', 'resources/js/app.js'])
+
+{!! \App\Http\Controllers\Admin\ThemeController::tokenCss() !!}
+</style>
 <style>
 .nav-link.active{background:#206bc4;color:#fff!important;border-radius:.5rem}
 .nav-link{border-radius:.5rem}

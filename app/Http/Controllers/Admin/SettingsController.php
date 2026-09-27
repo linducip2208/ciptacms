@@ -45,14 +45,38 @@ class SettingsController extends AdminController
                 ['key' => 'branding.favicon', 'label' => 'Favicon URL', 'type' => 'image', 'default' => '/favicon.ico'],
                 ['key' => 'branding.login_logo', 'label' => 'Login logo', 'type' => 'image', 'default' => '', 'help' => 'Used on the admin and front-end login screens.'],
                 ['key' => 'branding.login_background', 'label' => 'Login background URL', 'type' => 'image', 'default' => ''],
+                ['key' => 'branding.og_image', 'label' => 'Default share image', 'type' => 'image', 'default' => '', 'help' => 'Fallback OpenGraph image for pages without their own.'],
+
+                // Every value here is emitted as a CSS custom property by
+                // ThemeController::tokenCss() and bridged onto Tabler.
                 ['key' => 'branding.primary_color', 'label' => 'Primary colour', 'type' => 'color', 'default' => '#1d4ed8'],
                 ['key' => 'branding.secondary_color', 'label' => 'Secondary colour', 'type' => 'color', 'default' => '#0f172a'],
+                ['key' => 'branding.accent_color', 'label' => 'Accent colour', 'type' => 'color', 'default' => '#f59e0b'],
+                ['key' => 'branding.background_color', 'label' => 'Page background', 'type' => 'color', 'default' => '#ffffff'],
+                ['key' => 'branding.surface_color', 'label' => 'Alt section background', 'type' => 'color', 'default' => '#f8fafc'],
+                ['key' => 'branding.text_color', 'label' => 'Body text', 'type' => 'color', 'default' => '#0f172a'],
+                ['key' => 'branding.muted_color', 'label' => 'Muted text', 'type' => 'color', 'default' => '#64748b'],
+                ['key' => 'branding.border_color', 'label' => 'Borders', 'type' => 'color', 'default' => '#e5e7eb'],
+                ['key' => 'branding.footer_background', 'label' => 'Footer background', 'type' => 'color', 'default' => '#0f172a'],
+                ['key' => 'branding.footer_text', 'label' => 'Footer text', 'type' => 'text', 'default' => 'rgba(255,255,255,.72)'],
+
                 ['key' => 'branding.radius', 'label' => 'Corner radius', 'type' => 'text', 'default' => '12px'],
-                ['key' => 'branding.og_image', 'label' => 'Default share image', 'type' => 'image', 'default' => '', 'help' => 'Fallback OpenGraph image for pages without their own.'],
+                ['key' => 'branding.container_width', 'label' => 'Container width', 'type' => 'text', 'default' => '1180px'],
+                ['key' => 'branding.section_spacing', 'label' => 'Section spacing', 'type' => 'text', 'default' => '64px'],
+                ['key' => 'branding.header_height', 'label' => 'Header height', 'type' => 'text', 'default' => '68px'],
+
+                ['key' => 'branding.font_family', 'label' => 'Body font', 'type' => 'text', 'default' => '', 'help' => 'CSS font stack, e.g. Inter, system-ui, sans-serif'],
+                ['key' => 'branding.heading_font_family', 'label' => 'Heading font', 'type' => 'text', 'default' => '', 'help' => 'Leave empty to inherit the body font.'],
+                ['key' => 'branding.heading_weight', 'label' => 'Heading weight', 'type' => 'select', 'default' => '700', 'options' => ['400' => '400', '500' => '500', '600' => '600', '700' => '700', '800' => '800']],
+                ['key' => 'branding.button_weight', 'label' => 'Button weight', 'type' => 'select', 'default' => '600', 'options' => ['400' => '400', '500' => '500', '600' => '600', '700' => '700']],
+                ['key' => 'theme.color_mode', 'label' => 'Colour mode', 'type' => 'select', 'default' => 'auto', 'options' => ['auto' => 'Follow visitor preference', 'light' => 'Always light', 'dark' => 'Always dark'], 'help' => 'Applies to the public site. The admin stays light.'],
+
+                ['key' => 'general.site_name', 'label' => 'Application name', 'type' => 'text', 'default' => 'Lindu CMS'],
+                ['key' => 'general.tagline', 'label' => 'Tagline', 'type' => 'text', 'default' => ''],
                 ['key' => 'branding.admin_title', 'label' => 'Admin panel title', 'type' => 'text', 'default' => ''],
                 ['key' => 'branding.email_from_name', 'label' => 'Email sender name', 'type' => 'text', 'default' => ''],
                 ['key' => 'branding.email_from_address', 'label' => 'Email sender address', 'type' => 'text', 'default' => ''],
-                ['key' => 'branding.footer_branding', 'label' => 'Footer branding text', 'type' => 'text', 'default' => '', 'help' => 'Leave empty to hide any vendor credit.'],
+                ['key' => 'branding.footer_branding', 'label' => 'Footer vendor credit', 'type' => 'text', 'default' => '', 'help' => 'Leave empty to hide all vendor branding.'],
             ],
         ],
         'identity' => [

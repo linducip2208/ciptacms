@@ -1,114 +1,138 @@
 @extends('site.layout')
 @section('title', $seo['title'] ?? setting('general.site_name', 'Lindu CMS'))
+@section('description', $seo['description'] ?? null)
 
 @section('content')
     @isset($page)
-        {{-- Homepage rendered from Page Builder data --}}
-        @if(!empty($page->featured_image))
-            <div class="hero" style="background-image:linear-gradient(135deg,rgba(0,0,0,.55),rgba(0,0,0,.55)),url('{{ $page->featured_image }}');background-size:cover;background-position:center">
-                <div class="wrap"><h1>{{ $page->title }}</h1></div>
-            </div>
+        {{-- A Page Builder page owns the homepage entirely. --}}
+        @if (! empty($page->builder))
+            {!! $rendered ?? \App\Core\Services\BlockLibrary::render($page->builder) !!}
+        @else
+            <x-site.hero
+                :title="$page->title"
+                :subtitle="$page->excerpt"
+                :image="$page->featured_image"
+                label="Contact us"
+                url="{{ route('site.contact') }}"
+            />
+            @if (! empty($page->body))
+                <x-site.section :tight="true">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8 lindu-prose">{!! $page->body !!}</div>
+                    </div>
+                </x-site.section>
+            @endif
         @endif
-        <div class="wrap prose" style="padding-top:32px;padding-bottom:32px">
-            @if(!empty($page->builder))
-                {!! $rendered ?? \App\Core\Services\BlockLibrary::render($page->builder) !!}
-            @endif
-            @if(!empty($page->body))
-                {!! $page->body !!}
-            @endif
-        </div>
     @else
-        <div class="hero">
-            <div class="wrap">
-                <h1>{{ setting('general.tagline', 'Building digital products that grow with you.') }}</h1>
-                <p>{{ \Illuminate\Support\Str::limit(strip_tags((string) ($about['about.description'] ?? '')), 220) }}</p>
-                <p style="margin-top:24px">
-                    <a class="btn" href="{{ route('site.contact') }}" style="background:#fff;color:{{ setting('branding.primary_color', '#1d4ed8') }}">Get in touch</a>
-                    <a class="btn btn-outline" href="{{ route('site.portfolio') }}" style="color:#fff;border-color:rgba(255,255,255,.7);margin-left:8px">See our work</a>
-                </p>
-            </div>
-        </div>
+        <x-site.hero
+            :title="setting('general.tagline', 'Building digital products that grow with you.')"
+            :subtitle="setting('general.hero_subtitle', \Illuminate\Support\Str::limit(strip_tags((string) ($about['about.description'] ?? '')), 180))"
+            :image="setting('general.hero_image')"
+            label="Contact us"
+            url="{{ route('site.contact') }}"
+        />
 
-        <div class="wrap" style="padding-top:32px">
-            <div class="grid g4">
-                <div class="stat"><b>{{ $stats['projects'] ?? 0 }}</b><span>Projects delivered</span></div>
-                <div class="stat"><b>{{ $stats['clients'] ?? 0 }}</b><span>Happy clients</span></div>
-                <div class="stat"><b>{{ $stats['team'] ?? 0 }}</b><span>Team members</span></div>
-                <div class="stat"><b>{{ $stats['services'] ?? 0 }}</b><span>Services offered</span></div>
-            </div>
-        </div>
-
-        @if($services->isNotEmpty())
-        <section class="sec-alt">
-            <div class="wrap">
-                <div class="sec-head">
-                    <h2>What We Do</h2>
-                    <p>{{ setting('general.services_intro', 'A complete set of services to move your business forward.') }}</p>
-                </div>
-                <div class="grid g3">
-                    @foreach($services as $s)
-                        <div class="card">
-                            @if($s->icon)<div style="font-size:1.8rem;margin-bottom:8px">{{ $s->icon }}</div>@endif
-                            <h3><a href="{{ route('site.service', $s->slug) }}" style="text-decoration:none">{{ $s->title }}</a></h3>
-                            <p style="color:#64748b;margin:0">{{ \Illuminate\Support\Str::limit($s->excerpt, 110) }}</p>
-                        </div>
-                    @endforeach
+        @if (($stats ?? []) && ($stats['projects'] ?? 0) > 0)
+            <div class="border-bottom">
+                <div class="container-xl py-4">
+                    <x-site.stats :items="[
+                        ['value' => number_format($stats['projects'] ?? 0), 'label' => 'Projects delivered'],
+                        ['value' => number_format($stats['clients'] ?? 0), 'label' => 'Happy clients'],
+                        ['value' => number_format($stats['team'] ?? 0), 'label' => 'Team members'],
+                        ['value' => number_format($stats['services'] ?? 0), 'label' => 'Services offered'],
+                    ]" />
                 </div>
             </div>
-        </section>
         @endif
 
-        @if($testimonials->isNotEmpty())
-        <section>
-            <div class="wrap">
-                <div class="sec-head"><h2>What Our Clients Say</h2></div>
-                <div class="grid g3">
-                    @foreach($testimonials as $t)
-                        <div class="card">
-                            <div class="stars">@for($i=0;$i<$t->rating;$i++)★@endfor</div>
-                            <p>"{{ $t->testimonial }}"</p>
-                            <b>{{ $t->customer }}</b>
-                            @if($t->company)<div style="color:#64748b;font-size:.9rem">{{ $t->company }}</div>@endif
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </section>
+        @if ($services->isNotEmpty())
+            <x-site.section
+                title="What we do"
+                eyebrow="Services"
+                :description="setting('general.services_intro')"
+            >
+                <x-site.card-grid
+                    :columns="3"
+                    :items="$services->map(fn ($s) => [
+                        'title' => $s->title,
+                        'excerpt' => $s->excerpt,
+                        'icon' => $s->icon,
+                        'image' => $s->image,
+                        'url' => route('site.service', $s->slug),
+                        'cta' => 'Learn more',
+                    ])->all()"
+                />
+            </x-site.section>
         @endif
 
-        @if($clients->isNotEmpty())
-        <section class="sec-alt">
-            <div class="wrap">
-                <div class="sec-head"><h2>Trusted By</h2></div>
-                <div class="grid g4">
-                    @foreach($clients as $c)
-                        <div class="card" style="text-align:center;padding:18px">
-                            @if($c->logo)
-                                <img src="{{ $c->logo }}" alt="{{ $c->name }}" style="max-height:52px;width:auto;object-fit:contain">
-                            @else
-                                <b>{{ $c->name }}</b>
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </section>
+        @if ($portfolio->isNotEmpty())
+            <x-site.section
+                title="Selected work"
+                eyebrow="Portfolio"
+                :description="setting('general.portfolio_intro')"
+                :alt="true"
+                href="{{ route('site.portfolio') }}"
+                badge="All projects"
+            >
+                <x-site.card-grid
+                    :columns="3"
+                    :items="$portfolio->map(fn ($p) => [
+                        'title' => $p->title,
+                        'excerpt' => $p->excerpt,
+                        'image' => $p->images[0] ?? null,
+                        'url' => route('site.portfolio.item', $p->slug),
+                    ])->all()"
+                />
+            </x-site.section>
         @endif
 
-        @if($posts->isNotEmpty())
-        <section>
-            <div class="wrap">
-                <div class="sec-head"><h2>From The Blog</h2></div>
-                <div class="grid g3">
-                    @foreach($posts as $p)
-                        <div class="card">
-                            <h3><a href="{{ route('site.post', $p->slug) }}" style="text-decoration:none">{{ $p->title }}</a></h3>
-                            <p style="color:#64748b;margin:0">{{ \Illuminate\Support\Str::limit(strip_tags((string) $p->body), 100) }}</p>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </section>
+        @if ($testimonials->isNotEmpty())
+            <x-site.section
+                title="What our clients say"
+                eyebrow="Testimonials"
+                :description="setting('general.testimonials_intro')"
+            >
+                <x-site.testimonials :items="$testimonials" />
+            </x-site.section>
         @endif
+
+        @if ($clients->isNotEmpty())
+            <x-site.client-grid
+                title="Trusted by"
+                :description="setting('general.clients_intro')"
+                :items="$clients->map(fn ($c) => [
+                    'logo' => $c->logo,
+                    'url' => $c->website,
+                    'name' => $c->name,
+                ])->all()"
+            />
+        @endif
+
+        @if ($posts->isNotEmpty())
+            <x-site.section
+                title="From the blog"
+                eyebrow="Insights"
+                href="{{ route('site.blog') }}"
+                badge="All articles"
+            >
+                <x-site.card-grid
+                    :columns="3"
+                    :items="$posts->map(fn ($p) => [
+                        'title' => $p->title,
+                        'excerpt' => $p->excerpt ?: strip_tags((string) $p->body),
+                        'image' => $p->featured_image,
+                        'url' => route('site.post', $p->slug),
+                    ])->all()"
+                />
+            </x-site.section>
+        @endif
+
+        <x-site.cta
+            title="Let's build something together"
+            body="Tell us what you need and we will come back with a plan."
+            url="{{ route('site.contact') }}"
+            secondary-label="See our work"
+            :secondary-url="route('site.portfolio')"
+        />
     @endisset
 @endsection

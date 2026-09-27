@@ -1,46 +1,50 @@
 @extends('site.layout')
-@section('title', $seo['title'] ?? 'FAQ')
+@section('title', 'FAQ — ' . setting('general.site_name', 'Lindu CMS'))
+@section('description', setting('general.faq_intro'))
 
 @section('content')
-<div class="wrap">
-    {!! app(\App\Core\Services\SeoService::class)->breadcrumb([
-        ['name' => 'Home', 'url' => route('site.home')],
-        ['name' => 'FAQ'],
-    ]) !!}
-    <div class="sec-head">
-        <h2 class="page-title">Frequently Asked Questions</h2>
-        <p>{{ setting('general.faq_intro', 'Answers to the questions we hear most.') }}</p>
-    </div>
+    <x-site.hero
+        title="Frequently asked questions"
+        eyebrow="FAQ"
+        :subtitle="setting('general.faq_intro', 'Answers to the questions we hear most.')"
+        label="Still have questions?"
+        url="{{ route('site.contact') }}"
+    />
 
-    @if($grouped->isNotEmpty() && $categories->count() > 1)
-        <div class="filter-bar" style="justify-content:center">
-            <a href="#general" class="active">All</a>
-            @foreach($categories as $c)
-                <a href="#{{ \Illuminate\Support\Str::slug($c) }}">{{ $c }}</a>
-            @endforeach
+    <x-site.section>
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                @if ($grouped->isNotEmpty())
+                    @if ($grouped->count() > 1)
+                        <div class="lindu-filterbar justify-content-center mb-4">
+                            @foreach ($grouped as $category => $items)
+                                <a href="#faq-group-{{ \Illuminate\Support\Str::slug($category) }}">
+                                    {{ $category }} ({{ $items->count() }})
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    @foreach ($grouped as $category => $items)
+                        <div id="faq-group-{{ \Illuminate\Support\Str::slug($category) }}" class="mb-5">
+                            <h2 class="h3 mb-3">{{ $category }}</h2>
+                            <x-site.faq :items="$items" />
+                        </div>
+                    @endforeach
+                @else
+                    <x-site.empty-state
+                        title="No questions published yet"
+                        message="FAQs added in the admin appear here."
+                        icon="ti-help-circle"
+                    />
+                @endif
+            </div>
         </div>
-    @endif
-</div>
+    </x-site.section>
 
-<section style="padding-top:0">
-    <div class="wrap" style="max-width:820px">
-        @forelse($grouped as $category => $items)
-            <h3 style="margin-top:30px" id="{{ \Illuminate\Support\Str::slug($category) }}">{{ $category }}</h3>
-            @foreach($items as $f)
-                <details id="faq-{{ $f->id }}" style="border:1px solid #e5e7eb;border-radius:var(--lindu-radius);padding:14px 18px;margin-bottom:10px;background:#fff">
-                    <summary style="cursor:pointer;font-weight:600">{{ $f->question }}</summary>
-                    <div class="prose" style="margin-top:10px;color:#475569">{!! nl2br(e($f->answer)) !!}</div>
-                </details>
-            @endforeach
-        @empty
-            <div class="empty">No questions published yet.</div>
-        @endforelse
-
-        <div class="card" style="margin-top:34px;text-align:center">
-            <h3 style="margin-top:0">Still have questions?</h3>
-            <p style="color:#64748b">Get in touch and we will be happy to help.</p>
-            <a class="btn" href="{{ route('site.contact') }}">Contact Us</a>
-        </div>
-    </div>
-</section>
+    <x-site.cta
+        title="Did not find your answer?"
+        body="Ask us directly and we will reply personally."
+        url="{{ route('site.contact') }}"
+    />
 @endsection

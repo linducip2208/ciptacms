@@ -1,37 +1,84 @@
 @extends('site.layout')
-@section('title', ($seo['title'] ?? 'Blog').' — '.setting('general.site_name', 'Lindu CMS'))
+@section('title', ($seo['title'] ?? 'Blog') . ' — ' . setting('general.site_name', 'Lindu CMS'))
+@section('description', $seo['description'] ?? setting('general.blog_intro'))
 
 @section('content')
-<div class="wrap">
-    {!! app(\App\Core\Services\SeoService::class)->breadcrumb([
-        ['name' => 'Home', 'url' => route('site.home')],
-        ['name' => 'Blog'],
-    ]) !!}
-    <div class="sec-head"><h2 class="page-title">Blog</h2><p>{{ setting('general.blog_intro', 'Insights, news and updates.') }}</p></div>
-</div>
+    <x-site.hero
+        title="Blog"
+        eyebrow="Insights"
+        :subtitle="setting('general.blog_intro', 'Insights, news and updates.')"
+    />
 
-<section style="padding-top:0">
-    <div class="wrap">
-        <div class="grid g3">
-            @forelse($posts as $p)
-                <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column">
-                    @if($p->featured_image)
-                        <img src="{{ $p->featured_image }}" alt="{{ $p->title }}" style="width:100%;height:180px;object-fit:cover;display:block" loading="lazy">
-                    @endif
-                    <div style="padding:18px;flex:1;display:flex;flex-direction:column">
-                        @if($p->category)<span class="badge" style="align-self:flex-start">{{ $p->category->name }}</span>@endif
-                        <h3 style="margin:8px 0 6px"><a href="{{ route('site.post', $p->slug) }}" style="text-decoration:none">{{ $p->title }}</a></h3>
-                        <p style="color:#64748b;margin:0 0 10px;flex:1">{{ \Illuminate\Support\Str::limit($p->excerpt ?: strip_tags((string) $p->body), 120) }}</p>
-                        <div style="color:#94a3b8;font-size:.85rem">
-                            {{ optional($p->published_at)->format('M j, Y') }} · {{ $p->views }} views
+    <x-site.section>
+        @if ($posts->isEmpty())
+            <x-site.empty-state
+                title="No articles published yet"
+                message="Posts added in the admin appear here."
+                icon="ti-news"
+            />
+        @else
+            {{-- Featured first article, then a grid. --}}
+            @php $featured = $posts->first(); $rest = $posts->slice(1); @endphp
+
+            <div class="row g-4 mb-5">
+                <div class="col-lg-8">
+                    <a href="{{ route('site.post', $featured->slug) }}" class="text-decoration-none">
+                        <div class="card overflow-hidden h-100">
+                            @if ($featured->featured_image)
+                                <img src="{{ $featured->featured_image }}" alt="{{ $featured->title }}" class="card-img-top" style="max-height:22rem;object-fit:cover" loading="lazy">
+                            @endif
+                            <div class="card-body p-4">
+                                @if ($featured->category)
+                                    <span class="badge bg-blue-lt mb-2">{{ $featured->category->name }}</span>
+                                @endif
+                                <h2 class="h3">{{ $featured->title }}</h2>
+                                <p class="text-secondary">
+                                    {{ \Illuminate\Support\Str::limit($featured->excerpt ?: strip_tags((string) $featured->body), 180) }}
+                                </p>
+                                <div class="text-secondary small">
+                                    {{ optional($featured->published_at)->format('j M Y') }}
+                                    @if ($featured->author) · {{ $featured->author->name }} @endif
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
-            @empty
-                <div class="empty" style="grid-column:1/-1">No posts published yet.</div>
-            @endforelse
-        </div>
-        <div style="margin-top:26px">{{ $posts->links() }}</div>
-    </div>
-</section>
+
+                <div class="col-lg-4 d-flex flex-column gap-3">
+                    @foreach ($rest->take(3) as $post)
+                        <a href="{{ route('site.post', $post->slug) }}" class="text-decoration-none">
+                            <div class="card">
+                                <div class="card-body d-flex gap-3 align-items-center">
+                                    @if ($post->featured_image)
+                                        <img src="{{ $post->featured_image }}" alt="" loading="lazy"
+                                             class="rounded" style="width:4.5rem;height:4.5rem;object-fit:cover;flex-shrink:0">
+                                    @endif
+                                    <div>
+                                        <h3 class="h6 mb-1">{{ $post->title }}</h3>
+                                        <div class="text-secondary small">
+                                            {{ optional($post->published_at)->format('j M Y') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+
+            @if ($rest->count() > 3)
+                <x-site.card-grid
+                    :columns="3"
+                    :items="$rest->slice(3)->map(fn ($p) => [
+                        'title' => $p->title,
+                        'excerpt' => $p->excerpt ?: strip_tags((string) $p->body),
+                        'image' => $p->featured_image,
+                        'url' => route('site.post', $p->slug),
+                    ])->all()"
+                />
+            @endif
+
+            <x-site.pagination :paginator="$posts" />
+        @endif
+    </x-site.section>
 @endsection

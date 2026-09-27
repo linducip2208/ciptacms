@@ -1,43 +1,70 @@
 @extends('site.layout')
-@section('title', $seo['title'] ?? 'Services')
+@section('title', 'Services — ' . setting('general.site_name', 'Lindu CMS'))
+@section('description', setting('general.services_intro'))
 
 @section('content')
-<div class="wrap">
-    {!! app(\App\Core\Services\SeoService::class)->breadcrumb([
-        ['name' => 'Home', 'url' => route('site.home')],
-        ['name' => 'Services'],
-    ]) !!}
-    <div class="sec-head">
-        <h2 class="page-title">Our Services</h2>
-        <p>{{ setting('general.services_intro', 'Everything you need to build, launch and grow.') }}</p>
-    </div>
-</div>
+    <x-site.hero
+        title="What we do"
+        eyebrow="Services"
+        :subtitle="setting('general.services_intro', 'Everything you need to build, launch and grow.')"
+        label="Start a project"
+        url="{{ route('site.contact') }}"
+    />
 
-<section style="padding-top:0">
-    <div class="wrap">
-        @forelse($services as $s)
-            <div class="card" style="margin-bottom:20px;display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
-                @if($s->image)
-                    <img src="{{ $s->image }}" alt="{{ $s->title }}" style="width:150px;height:110px;object-fit:cover;border-radius:10px">
-                @elseif($s->icon)
-                    <div style="font-size:2.4rem;width:80px;text-align:center">{{ $s->icon }}</div>
-                @endif
-                <div style="flex:1;min-width:240px">
-                    <h3 style="margin-top:0">{{ $s->title }}</h3>
-                    <p style="color:#64748b;margin:0 0 12px">{{ $s->excerpt }}</p>
-                    @if($s->features)
-                        <ul style="margin:0;padding-left:20px;color:#475569">
-                            @foreach($s->features as $f)
-                                <li>{{ is_array($f) ? ($f['title'] ?? json_encode($f)) : $f }}</li>
-                            @endforeach
-                        </ul>
-                    @endif
-                    <p style="margin:14px 0 0"><a class="btn" href="{{ route('site.service', $s->slug) }}">Learn more</a></p>
-                </div>
+    <x-site.section>
+        @if ($services->isEmpty())
+            <x-site.empty-state
+                title="No services published yet"
+                message="Services added in the admin appear here."
+            />
+        @else
+            <div class="row g-4">
+                @foreach ($services as $service)
+                    <div class="col-lg-6">
+                        <div class="card h-100">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-start gap-3 mb-3">
+                                    @if ($service->image)
+                                        <img src="{{ $service->image }}" alt="{{ $service->title }}" class="rounded" style="width:4.5rem;height:3.5rem;object-fit:cover" loading="lazy">
+                                    @elseif ($service->icon)
+                                        <div class="fs-1" style="color:var(--tblr-primary)">{{ $service->icon }}</div>
+                                    @endif
+
+                                    <div>
+                                        <h2 class="h3 mb-1">
+                                            <a href="{{ route('site.service', $service->slug) }}" class="text-decoration-none stretched-link">{{ $service->title }}</a>
+                                        </h2>
+                                        @if ($service->excerpt)
+                                            <p class="text-secondary mb-0">{{ $service->excerpt }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                @if ($service->description)
+                                    <div class="lindu-prose text-secondary">{!! $service->description !!}</div>
+                                @endif
+
+                                @if (filled($service->features))
+                                    <ul class="list-unstyled d-grid gap-2 mt-3">
+                                        @foreach ($service->features as $feature)
+                                            <li class="d-flex gap-2">
+                                                <i class="ti ti-check text-success mt-1"></i>
+                                                <span>{{ is_array($feature) ? ($feature['title'] ?? '') : $feature }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
-        @empty
-            <div class="empty">No services published yet.</div>
-        @endforelse
-    </div>
-</section>
+        @endif
+    </x-site.section>
+
+    <x-site.cta
+        title="Need something not listed?"
+        body="Most projects combine more than one service. Tell us what you are after."
+        url="{{ route('site.contact') }}"
+    />
 @endsection

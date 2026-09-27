@@ -86,9 +86,9 @@ class BlockLibrary
                 'type' => 'grid', 'label' => 'Grid', 'icon' => 'ti ti-layout-grid', 'group' => 'layout',
                 'fields' => [
                     'columns' => ['label' => 'Columns', 'type' => 'select', 'options' => [2 => 2, 3 => 3, 4 => 4]],
-                    'gap' => ['label' => 'Gap', 'type' => 'text'],
+                    'items' => ['label' => 'Items ("Title|Text" per line)', 'type' => 'lines'],
                 ],
-                'defaults' => ['columns' => 3, 'gap' => '24px'],
+                'defaults' => ['columns' => 3, 'items' => []],
             ],
             [
                 'type' => 'gallery', 'label' => 'Gallery', 'icon' => 'ti ti-photo-plus', 'group' => 'media',
@@ -257,7 +257,7 @@ class BlockLibrary
         }
 
         return '<section class="'.$classes.'" style="'.$style.$media.'">'
-            .'<div class="wrap">'.$inner.'</div>'
+            .'<div class="container-xl">'.$inner.'</div>'
             .'</section>';
     }
 
@@ -405,14 +405,35 @@ class BlockLibrary
         return $html;
     }
 
-    /** A grid wraps the blocks that follow it until the next grid. */
+    /**
+     * A column grid.
+     *
+     * Previously this opened a wrapper and implicitly "owned" the blocks that
+     * followed it, so it never closed its own <div> and every page using it
+     * shipped broken markup. It is now a self-contained component with its own
+     * items, like every other card-shaped component.
+     */
     protected static function grid(array $b): string
     {
         $cols = max(1, min(6, (int) ($b['columns'] ?? 3)));
-        $gap = e((string) ($b['gap'] ?? '24px'));
+        $items = self::lines($b['items'] ?? []);
 
-        return '<div class="lindu-grid" data-columns="'.$cols.'" '
-            .'style="display:grid;grid-template-columns:repeat('.$cols.',1fr);gap:'.$gap.'">';
+        if ($items === []) {
+            return '<div class="lindu-auto-grid" style="grid-template-columns:repeat('.$cols.',minmax(0,1fr))"></div>';
+        }
+
+        $html = '<div class="lindu-auto-grid" style="grid-template-columns:repeat('
+            .$cols.',minmax(0,1fr))">';
+
+        foreach ($items as $item) {
+            [$title, $body] = array_pad(explode('|', $item, 2), 2, '');
+            $html .= '<div class="card h-100"><div class="card-body">'
+                .'<h3 class="h5 mb-1">'.e(trim($title)).'</h3>'
+                .($body !== '' ? '<p class="text-secondary mb-0">'.e(trim($body)).'</p>' : '')
+                .'</div></div>';
+        }
+
+        return $html.'</div>';
     }
 
     protected static function gallery(array $b): string
@@ -515,7 +536,7 @@ class BlockLibrary
             return '<p class="text-muted">Testimonials: none published yet.</p>';
         }
 
-        $html = '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px">';
+        $html = '<div class="lindu-auto-grid" style="--min:260px">';
         foreach ($rows as $t) {
             $html .= '<div class="card" style="border:1px solid var(--lindu-border,#e5e7eb);border-radius:var(--lindu-radius);padding:20px">'
                 .'<div style="color:#f59e0b">'.str_repeat('★', max(0, min(5, (int) $t->rating))).'</div>'
@@ -536,7 +557,7 @@ class BlockLibrary
         }
 
         $currency = e((string) ($b['currency'] ?? 'Rp'));
-        $html = '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px">';
+        $html = '<div class="lindu-auto-grid" style="--min:240px">';
 
         foreach ($items as $line) {
             $parts = array_pad(explode('|', $line, 3), 3, '');
@@ -566,7 +587,7 @@ class BlockLibrary
             return '<p class="text-muted">Team: no members published yet.</p>';
         }
 
-        $html = '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;text-align:center">';
+        $html = '<div class="lindu-auto-grid" style="--min:200px;text-align:center">';
         foreach ($rows as $m) {
             $photo = $m->photo
                 ? '<img src="'.e($m->photo).'" alt="'.e($m->name).'" style="width:110px;height:110px;object-fit:cover;border-radius:50%;margin:0 auto 10px" loading="lazy">'
@@ -702,7 +723,7 @@ class BlockLibrary
             return '<p class="text-muted">'.e($empty).'</p>';
         }
 
-        $html = '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px">';
+        $html = '<div class="lindu-auto-grid" style="--min:260px">';
         foreach ($rows as $r) {
             $html .= '<div class="card" style="border:1px solid var(--lindu-border,#e5e7eb);border-radius:var(--lindu-radius);padding:20px">'
                 .'<h3 style="margin:0 0 6px"><a href="'.e((string) $r['url']).'" style="text-decoration:none">'.e((string) $r['title']).'</a></h3>'

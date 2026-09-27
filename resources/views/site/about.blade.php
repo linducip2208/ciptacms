@@ -1,89 +1,94 @@
 @extends('site.layout')
-@section('title', $seo['title'] ?? 'About Us')
+@section('title', 'About us — ' . setting('general.site_name', 'Lindu CMS'))
+@section('description', \Illuminate\Support\Str::limit(strip_tags((string) ($about['about.description'] ?? '')), 160))
+
+@php
+    $aboutSummary = \Illuminate\Support\Str::limit(strip_tags((string) ($about['about.description'] ?? '')), 220);
+@endphp
 
 @section('content')
-<div class="wrap">
-    {!! app(\App\Core\Services\SeoService::class)->breadcrumb([
-        ['name' => 'Home', 'url' => route('site.home')],
-        ['name' => 'About'],
-    ]) !!}
-</div>
+    <x-site.hero
+        title="{{ setting('general.site_name', 'Lindu CMS') }}"
+        :subtitle="$aboutSummary"
+        label="Contact us"
+        url="{{ route('site.contact') }}"
+    />
 
-<section style="padding-top:24px">
-    <div class="wrap">
-        <h1 class="page-title">{{ setting('general.site_name', 'Lindu CMS') }}</h1>
-        <div class="prose">
-            @if($about['about.description'])
-                <p style="font-size:1.1rem">{{ $about['about.description'] }}</p>
-            @endif
+    @if (($stats['projects'] ?? 0) > 0 || ($stats['clients'] ?? 0) > 0)
+        <div class="border-bottom">
+            <div class="container-xl py-4">
+                <x-site.stats :items="[
+                    ['value' => $stats['years'] . '+', 'label' => 'Years of experience'],
+                    ['value' => number_format($stats['projects']), 'label' => 'Projects completed'],
+                    ['value' => number_format($stats['clients']), 'label' => 'Clients served'],
+                ]" />
+            </div>
         </div>
+    @endif
 
-        <div class="grid g3" style="margin-top:28px">
-            <div class="stat card"><b>{{ $stats['years'] }}+</b><span>Years of experience</span></div>
-            <div class="stat card"><b>{{ $stats['projects'] }}</b><span>Projects completed</span></div>
-            <div class="stat card"><b>{{ $stats['clients'] }}</b><span>Clients served</span></div>
-        </div>
-    </div>
-</section>
-
-@if($about['about.history'] || $about['about.vision'] || $about['about.mission'])
-<section class="sec-alt">
-    <div class="wrap">
-        <div class="grid g2">
-            @if($about['about.history'])
-                <div class="card">
-                    <h3>Our History</h3>
-                    <div class="prose">{!! nl2br(e($about['about.history'])) !!}</div>
-                </div>
-            @endif
-            @if($about['about.vision'])
-                <div class="card">
-                    <h3>Our Vision</h3>
-                    <div class="prose">{!! nl2br(e($about['about.vision'])) !!}</div>
-                </div>
-            @endif
-            @if($about['about.mission'])
-                <div class="card">
-                    <h3>Our Mission</h3>
-                    <div class="prose">{!! nl2br(e($about['about.mission'])) !!}</div>
-                </div>
-            @endif
-        </div>
-    </div>
-</section>
-@endif
-
-@if(!empty($about['about.values']))
-<section>
-    <div class="wrap">
-        <div class="sec-head"><h2>Our Values</h2></div>
-        <div class="grid g4">
-            @foreach($about['about.values'] as $value)
-                @php $text = is_array($value) ? ($value['title'] ?? $value['value'] ?? json_encode($value)) : $value; @endphp
-                <div class="card"><p style="margin:0">{{ $text }}</p></div>
-            @endforeach
-        </div>
-    </div>
-</section>
-@endif
-
-@if($team->isNotEmpty())
-<section class="sec-alt">
-    <div class="wrap">
-        <div class="sec-head"><h2>Meet The Team</h2><p>The people behind the work.</p></div>
-        <div class="grid g4">
-            @foreach($team as $m)
-                <div class="card" style="text-align:center">
-                    @if($m->photo)
-                        <img src="{{ $m->photo }}" alt="{{ $m->name }}" style="width:96px;height:96px;object-fit:cover;border-radius:50%;margin-bottom:10px">
+    @if (! empty($about['about.history']) || ! empty($about['about.vision']) || ! empty($about['about.mission']))
+        <x-site.section title="Who we are" eyebrow="Our story">
+            <div class="row g-4">
+                @foreach (['about.history' => 'Our history', 'about.vision' => 'Our vision', 'about.mission' => 'Our mission'] as $key => $label)
+                    @if (! empty($about[$key]))
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h3 class="h4">{{ $label }}</h3>
+                                    <div class="lindu-prose text-secondary">{!! nl2br(e($about[$key])) !!}</div>
+                                </div>
+                            </div>
+                        </div>
                     @endif
-                    <h3 style="margin:0 0 2px">{{ $m->name }}</h3>
-                    <div style="color:#64748b;font-size:.9rem">{{ $m->position }}</div>
-                </div>
-            @endforeach
-        </div>
-        <p style="text-align:center;margin-top:26px"><a class="btn btn-outline" href="{{ route('site.team') }}">Meet everyone</a></p>
-    </div>
-</section>
-@endif
+                @endforeach
+            </div>
+        </x-site.section>
+    @endif
+
+    @if (! empty($about['about.values']))
+        <x-site.section
+            title="Our values"
+            eyebrow="What drives us"
+            :alt="true"
+            href="{{ route('site.team') }}"
+            badge="Meet the team"
+        >
+            <div class="row g-3">
+                @foreach ($about['about.values'] as $value)
+                    @php $text = is_array($value) ? ($value['title'] ?? $value['value'] ?? '') : $value; @endphp
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <i class="ti ti-check-circle fs-3 mb-2" style="color:var(--tblr-primary)"></i>
+                                <p class="mb-0">{{ $text }}</p>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </x-site.section>
+    @endif
+
+    @if ($team->isNotEmpty())
+        <x-site.section title="Meet the team" eyebrow="People" href="{{ route('site.team') }}" badge="Everyone">
+            <x-site.card-grid
+                :columns="4"
+                :items="$team->map(fn ($m) => [
+                    'title' => $m->name,
+                    'excerpt' => $m->position,
+                    'image' => $m->photo,
+                    'imageAlt' => $m->name,
+                    'url' => route('site.team'),
+                ])->all()"
+            />
+        </x-site.section>
+    @endif
+
+    <x-site.cta
+        title="Want to work together?"
+        body="Tell us about the project and we will reply with next steps."
+        url="{{ route('site.contact') }}"
+        secondary-label="View our services"
+        :secondary-url="route('site.services')"
+    />
 @endsection

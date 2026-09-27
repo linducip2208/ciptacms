@@ -95,6 +95,7 @@ class SiteController extends Controller
 
         return $this->view('home', [
             'services' => $this->safeCollection(Service::class, fn ($q) => $q->published()->ordered()->limit(6)),
+            'portfolio' => $this->safeCollection(\App\Models\Cp\Portfolio::class, fn ($q) => $q->published()->ordered()->limit(6)),
             'posts' => $this->safeCollection(Post::class, fn ($q) => $q->where('status', 'published')->latest('published_at')->limit(3)),
             'testimonials' => $this->safeCollection(Testimonial::class, fn ($q) => $q->published()->ordered()->limit(6)),
             'clients' => $this->safeCollection(Client::class, fn ($q) => $q->published()->ordered()->limit(12)),

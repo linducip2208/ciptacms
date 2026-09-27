@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login | Lindu CMS</title>{{-- Bundled locally: a CDN outage must never lock operators out of their own admin. --}}@vite(['resources/css/tabler.css'])</head>
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login | Lindu CMS</title>{{-- Bundled locally: a CDN outage must never lock operators out of their own admin. --}}@vite(['resources/css/app.css'])</head>
 <body class="d-flex flex-column"><div class="page page-center"><div class="container container-tight py-4">
 <div class="text-center mb-3"><span class="badge bg-blue text-white p-2">L</span> <b>{{ setting('general.site_name','Lindu CMS') }}</b></div>
 <div class="card card-md"><div class="card-body">

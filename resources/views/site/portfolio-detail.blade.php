@@ -1,53 +1,81 @@
 @extends('site.layout')
-@section('title', $seo['title'] ?? $item->title)
+@section('title', ($seo['title'] ?? $item->title) . ' — ' . setting('general.site_name', 'Lindu CMS'))
+@section('description', $seo['description'] ?? \Illuminate\Support\Str::limit(strip_tags((string) $item->excerpt), 160))
 
 @section('content')
-<div class="wrap">
-    {!! app(\App\Core\Services\SeoService::class)->breadcrumb([
-        ['name' => 'Home', 'url' => route('site.home')],
-        ['name' => 'Portfolio', 'url' => route('site.portfolio')],
-        ['name' => $item->title],
-    ]) !!}
-</div>
-
-<section style="padding-top:24px">
-    <div class="wrap">
-        <h1 class="page-title">{{ $item->title }}</h1>
-        <div class="grid g4" style="margin:14px 0 22px">
-            @if($item->client)<div><b>Client</b><br>{{ $item->client }}</div>@endif
-            @if($item->category)<div><b>Category</b><br>{{ $item->category }}</div>@endif
-            @if($item->project_date)<div><b>Date</b><br>{{ $item->project_date->format('M Y') }}</div>@endif
-            @if($item->url)<div><b>Visit</b><br><a href="{{ $item->url }}" rel="noopener" target="_blank">Open project ↗</a></div>@endif
+    <div class="border-bottom">
+        <div class="container-xl py-3">
+            <x-site.breadcrumbs :items="[
+                ['label' => 'Home', 'url' => route('site.home')],
+                ['label' => 'Portfolio', 'url' => route('site.portfolio')],
+                ['label' => $item->title],
+            ]" />
         </div>
-
-        @if($item->images)
-            <div class="gallery-grid">
-                @foreach($item->images as $img)
-                    <img src="{{ $img }}" alt="{{ $item->title }}" loading="lazy">
-                @endforeach
-            </div>
-        @endif
-
-        @if($item->excerpt)<p style="font-size:1.1rem;color:#475569;margin-top:24px">{{ $item->excerpt }}</p>@endif
-        @if($item->description)<div class="prose">{!! $item->description !!}</div>@endif
-
-        @if($item->technology)
-            <h3 style="margin-top:28px">Technology</h3>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-                @foreach($item->technology as $tech)
-                    <span class="badge">{{ $tech }}</span>
-                @endforeach
-            </div>
-        @endif
-
-        @if($related->isNotEmpty())
-            <h3 style="margin-top:40px">More work</h3>
-            <div class="grid g3">
-                @foreach($related as $r)
-                    <div class="card"><a href="{{ route('site.portfolio.item', $r->slug) }}" style="text-decoration:none"><b>{{ $r->title }}</b></a></div>
-                @endforeach
-            </div>
-        @endif
     </div>
-</section>
+
+    <x-site.section :tight="true">
+        <div class="row g-5">
+            <div class="col-lg-8">
+                <span class="lindu-eyebrow">{{ $item->category ?: 'Project' }}</span>
+                <h1 class="mb-3">{{ $item->title }}</h1>
+
+                <div class="d-flex flex-wrap gap-4 text-secondary small mb-4">
+                    @if ($item->client)<span><i class="ti ti-building me-1"></i>{{ $item->client }}</span>@endif
+                    @if ($item->project_date)<span><i class="ti ti-calendar me-1"></i>{{ $item->project_date->format('M Y') }}</span>@endif
+                    @if ($item->url)
+                        <a href="{{ $item->url }}" target="_blank" rel="noopener" class="text-decoration-none">
+                            <i class="ti ti-external-link me-1"></i>Visit project
+                        </a>
+                    @endif
+                </div>
+
+                @if (filled($item->images))
+                    <div class="row g-3 mb-4">
+                        @foreach ($item->images as $image)
+                            <div class="col-12">
+                                <img src="{{ $image }}" alt="{{ $item->title }}" loading="lazy" class="rounded w-100">
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                @if (! empty($item->description))
+                    <div class="lindu-prose">{!! $item->description !!}</div>
+                @endif
+
+                @if (filled($item->technology))
+                    <h2 class="h4 mt-4 mb-2">Technology</h2>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach ($item->technology as $tech)
+                            <span class="badge bg-blue-lt">{{ is_array($tech) ? ($tech['title'] ?? '') : $tech }}</span>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+            <aside class="col-lg-4">
+                @if ($related->isNotEmpty())
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="h6 text-secondary text-uppercase mb-3" style="lindu-micro-label">
+                                More work
+                            </h2>
+                            <ul class="list-unstyled d-grid gap-2 mb-0">
+                                @foreach ($related as $r)
+                                    <li>
+                                        <a href="{{ route('site.portfolio.item', $r->slug) }}" class="text-decoration-none">
+                                            {{ $r->title }}
+                                            @if ($r->client)<div class="text-secondary small">{{ $r->client }}</div>@endif
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                @endif
+
+                <a href="{{ route('site.contact') }}" class="btn btn-primary w-100 mt-3">Start a project like this</a>
+            </aside>
+        </div>
+    </x-site.section>
 @endsection

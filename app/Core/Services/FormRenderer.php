@@ -101,37 +101,43 @@ class FormRenderer
         $id = 'f-'.$field->id;
         $name = e($field->name);
         $req = $field->is_required ? ' required' : '';
+        $reqMark = $field->is_required ? ' <span class="text-danger" aria-hidden="true">*</span>' : '';
         $val = is_scalar($value) ? (string) $value : '';
 
-        $wrapStyle = 'margin-bottom:14px';
-        $label = '<label for="'.$id.'" style="display:block;font-weight:600;margin-bottom:6px;font-size:.9rem">'
-            .e($field->label).($field->is_required ? ' <span style="color:#e11d48">*</span>' : '').'</label>';
+        // Tabler's form classes, so a builder form looks like every other
+        // form on the site. The required marker is announced by `required`,
+        // not only by the asterisk.
+        $label = '<label class="form-label" for="'.$id.'">'
+            .e($field->label).$reqMark.'</label>';
 
-        $help = $field->help ? '<small style="color:#64748b;display:block;margin-top:4px">'.e($field->help).'</small>' : '';
+        $help = $field->help
+            ? '<small class="form-hint d-block mt-1">'.e($field->help).'</small>'
+            : '';
 
         $input = match ($field->type) {
-            'textarea', 'richtext' => '<textarea id="'.$id.'" name="'.$name.'" rows="5"'.$req.' placeholder="'.e($field->placeholder).'" '
-                .'style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">'.e($val).'</textarea>',
+            'textarea', 'richtext' => '<textarea class="form-control" id="'.$id.'" name="'.$name.'" rows="5"'.$req
+                .' placeholder="'.e($field->placeholder).'">'.e($val).'</textarea>',
 
             'select' => $this->select($id, $name, $field, $val, $req, false),
             'multiselect' => $this->select($id, $name, $field, $val, $req, true),
             'radio', 'checkbox' => $this->choice($id, $name, $field, $val),
-            'number' => '<input id="'.$id.'" type="number" name="'.$name.'" value="'.e($val).'"'.$req.' placeholder="'.e($field->placeholder).'" style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">',
-            'email' => '<input id="'.$id.'" type="email" name="'.$name.'" value="'.e($val).'"'.$req.' style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">',
-            'url' => '<input id="'.$id.'" type="url" name="'.$name.'" value="'.e($val).'"'.$req.' style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">',
-            'password' => '<input id="'.$id.'" type="password" name="'.$name.'"'.$req.' autocomplete="new-password" style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">',
-            'phone' => '<input id="'.$id.'" type="tel" name="'.$name.'" value="'.e($val).'"'.$req.' style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">',
-            'date' => '<input id="'.$id.'" type="date" name="'.$name.'" value="'.e($val).'"'.$req.' style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">',
-            'datetime' => '<input id="'.$id.'" type="datetime-local" name="'.$name.'" value="'.e($val).'"'.$req.' style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">',
-            'file', 'image' => '<input id="'.$id.'" type="file" name="'.$name.'"'.$req.' '
-                .($field->type === 'image' ? 'accept="image/*" ' : '')
-                .'style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px">',
+            'number' => '<input class="form-control" id="'.$id.'" type="number" name="'.$name.'" value="'.e($val).'"'.$req
+                .' placeholder="'.e($field->placeholder).'">',
+            'email' => '<input class="form-control" id="'.$id.'" type="email" name="'.$name.'" value="'.e($val).'"'.$req.'>',
+            'url' => '<input class="form-control" id="'.$id.'" type="url" name="'.$name.'" value="'.e($val).'"'.$req.'>',
+            'password' => '<input class="form-control" id="'.$id.'" type="password" name="'.$name.'"'.$req.' autocomplete="new-password">',
+            'phone' => '<input class="form-control" id="'.$id.'" type="tel" name="'.$name.'" value="'.e($val).'"'.$req.'>',
+            'date' => '<input class="form-control" id="'.$id.'" type="date" name="'.$name.'" value="'.e($val).'"'.$req.'>',
+            'datetime' => '<input class="form-control" id="'.$id.'" type="datetime-local" name="'.$name.'" value="'.e($val).'"'.$req.'>',
+            'file', 'image' => '<input class="form-control" id="'.$id.'" type="file" name="'.$name.'"'.$req.' '
+                .($field->type === 'image' ? 'accept="image/*" ' : '').'>',
             'hidden' => '<input id="'.$id.'" type="hidden" name="'.$name.'" value="'.e($field->placeholder ?: $val).'">',
 
-            default => '<input id="'.$id.'" type="text" name="'.$name.'" value="'.e($val).'"'.$req.' placeholder="'.e($field->placeholder).'" style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">',
+            default => '<input class="form-control" id="'.$id.'" type="text" name="'.$name.'" value="'.e($val).'"'.$req
+                .' placeholder="'.e($field->placeholder).'">',
         };
 
-        return '<div style="'.$wrapStyle.'">'.$label.$input.$help.'</div>';
+        return '<div class="mb-3">'.$label.$input.$help.'</div>';
     }
 
     protected function select(string $id, string $name, FormField $field, string $value, string $req, bool $multi): string
@@ -139,9 +145,9 @@ class FormRenderer
         $options = (array) ($field->options ?? []);
         $selected = $multi ? (array) (json_decode($value, true) ?: []) : [$value];
 
-        $html = '<select id="'.$id.'" name="'.$name.($multi ? '[]' : '').'"'
+        $html = '<select class="form-select" id="'.$id.'" name="'.$name.($multi ? '[]' : '').'"'
             .($multi ? ' multiple size="'.max(3, min(8, count($options) ?: 3)).'"' : '')
-            .$req.' style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">';
+            .$req.'>';
 
         if (! $multi) {
             $html .= '<option value="">—</option>';

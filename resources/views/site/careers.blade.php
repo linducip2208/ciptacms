@@ -1,64 +1,103 @@
 @extends('site.layout')
-@section('title', $seo['title'] ?? 'Careers')
+@section('title', 'Careers — ' . setting('general.site_name', 'Lindu CMS'))
+@section('description', setting('general.careers_intro'))
 
 @section('content')
-<div class="wrap">
-    {!! app(\App\Core\Services\SeoService::class)->breadcrumb([
-        ['name' => 'Home', 'url' => route('site.home')],
-        ['name' => 'Careers'],
-    ]) !!}
-    <div class="sec-head">
-        <h2 class="page-title">Join Our Team</h2>
-        <p>{{ setting('general.careers_intro', 'We are always looking for talented people.') }}</p>
-    </div>
+    <x-site.hero
+        title="Join our team"
+        eyebrow="Careers"
+        :subtitle="setting('general.careers_intro', 'We are always looking for talented people.')"
+    />
 
-    <form class="filter-bar" method="GET" action="{{ route('site.careers') }}">
-        @if($locations->isNotEmpty())
-            <select name="location" onchange="this.form.submit()" style="padding:7px 12px;border:1px solid #cbd5e1;border-radius:99px">
-                <option value="">All locations</option>
-                @foreach($locations as $l)
-                    <option value="{{ $l }}" @selected(request('location') === $l)>{{ $l }}</option>
-                @endforeach
-            </select>
-        @endif
-        <input name="search" value="{{ request('search') }}" placeholder="Search position…" style="padding:7px 14px;border:1px solid #cbd5e1;border-radius:99px">
-        <button class="btn" style="padding:7px 18px">Search</button>
-    </form>
-</div>
-
-<section style="padding-top:0">
-    <div class="wrap" style="max-width:900px">
-        @forelse($rows as $c)
-            @php
-                $closed = $c->deadline && $c->deadline->isPast();
-                $rowStyle = 'margin-bottom:14px;display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap;'
-                    .($closed ? 'opacity:.6' : '');
-            @endphp
-            <div class="card" style="{{ $rowStyle }}">
-                <div>
-                    <h3 style="margin:0 0 4px">
-                        @if($closed)
-                            {{ $c->position }}
-                        @else
-                            <a href="{{ route('site.career', $c->slug) }}" style="text-decoration:none">{{ $c->position }}</a>
-                        @endif
-                    </h3>
-                    <div style="color:#64748b;font-size:.9rem;display:flex;gap:14px;flex-wrap:wrap">
-                        @if($c->location)<span>📍 {{ $c->location }}</span>@endif
-                        @if($c->employment_type)<span>💼 {{ $c->employment_type }}</span>@endif
-                        @if($c->deadline)<span>⏳ Apply before {{ $c->deadline->format('M j, Y') }}</span>@endif
-                    </div>
+    <x-site.section>
+        <form class="row g-2 justify-content-center mb-4" method="GET" action="{{ route('site.careers') }}">
+            @if ($locations->isNotEmpty())
+                <div class="col-sm-4">
+                    <select name="location" class="form-select" onchange="this.form.submit()" aria-label="Filter by location">
+                        <option value="">All locations</option>
+                        @foreach ($locations as $location)
+                            <option value="{{ $location }}" @selected(request('location') === $location)>{{ $location }}</option>
+                        @endforeach
+                    </select>
                 </div>
-                @if($closed)
-                    <span class="badge" style="background:#fef2f2;color:#991b1b">Closed</span>
-                @else
-                    <a class="btn" href="{{ route('site.career', $c->slug) }}">Apply now</a>
-                @endif
+            @endif
+            <div class="col-sm-4">
+                <div class="input-group">
+                    <input name="search" value="{{ request('search') }}" class="form-control" placeholder="Search roles…" aria-label="Search roles">
+                    <button class="btn btn-primary">Search</button>
+                </div>
             </div>
-        @empty
-            <div class="empty">No open positions right now. Check back soon.</div>
-        @endforelse
-        <div style="margin-top:20px">{{ $rows->links() }}</div>
-    </div>
-</section>
+        </form>
+
+        @if ($rows->isEmpty())
+            <x-site.empty-state
+                title="No open positions right now"
+                message="Check back soon, or send us a speculative application."
+                icon="ti-briefcase"
+            >
+                <a href="{{ route('site.contact') }}" class="btn btn-primary mt-3">Send an application</a>
+            </x-site.empty-state>
+        @else
+            <div class="accordion" id="careersAccordion">
+                @foreach ($rows as $i => $career)
+                    @php $closed = $career->deadline && $career->deadline->isPast(); @endphp
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="ch-{{ $career->id }}">
+                            <button class="accordion-button {{ $i > 0 ? 'collapsed' : '' }}" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#cc-{{ $career->id }}"
+                                    aria-expanded="{{ $i === 0 ? 'true' : 'false' }}" aria-controls="cc-{{ $career->id }}">
+                                <span class="me-2 fw-semibold">{{ $career->position }}</span>
+                                <span class="text-secondary small fw-normal">
+                                    {{ collect([$career->location, $career->employment_type])->filter()->implode(' · ') }}
+                                </span>
+                                @if ($closed)
+                                    <span class="badge bg-secondary ms-2">Closed</span>
+                                @endif
+                            </button>
+                        </h2>
+                        <div id="cc-{{ $career->id }}" class="accordion-collapse collapse {{ $i === 0 ? 'show' : '' }}"
+                             aria-labelledby="ch-{{ $career->id }}"
+                             @if ($i === 0) data-bs-parent="#careersAccordion" @endif>
+                            <div class="accordion-body">
+                                @if (! empty($career->description))
+                                    <div class="lindu-prose">{!! $career->description !!}</div>
+                                @endif
+
+                                @if (filled($career->requirements))
+                                    <h3 class="h6 mt-3 mb-2">Requirements</h3>
+                                    <ul class="list-unstyled d-grid gap-1">
+                                        @foreach ($career->requirements as $requirement)
+                                            <li class="d-flex gap-2">
+                                                <i class="ti ti-circle-filled" style="font-size:.35rem;margin-top:.55rem;color:var(--tblr-primary)"></i>
+                                                <span>{{ is_array($requirement) ? ($requirement['title'] ?? '') : $requirement }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+
+                                @if ($career->deadline)
+                                    <p class="text-secondary small mt-3 mb-0">
+                                        <i class="ti ti-clock me-1"></i>
+                                        @if ($closed)
+                                            Applications closed {{ $career->deadline->format('j M Y') }}
+                                        @else
+                                            Apply before {{ $career->deadline->format('j M Y') }}
+                                        @endif
+                                    </p>
+                                @endif
+
+                                @unless ($closed)
+                                    <a href="{{ route('site.career', $career->slug) }}" class="btn btn-primary mt-3">
+                                        Apply for this role
+                                    </a>
+                                @endunless
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <x-site.pagination :paginator="$rows" />
+        @endif
+    </x-site.section>
 @endsection

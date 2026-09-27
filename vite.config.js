@@ -7,8 +7,11 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
+                // One stylesheet for the whole product: Tabler (foundation) +
+                // Tailwind (utility layer) + the CMS design tokens. Loading
+                // separate bundles per layout compiled Tailwind twice and left
+                // the admin's utility classes unstyled.
                 'resources/css/app.css',
-                'resources/css/tabler.css',
                 'resources/js/app.js',
                 'resources/js/tabler.js',
                 // Fallback renderers. The primary paths are PHP-side, so these

@@ -23,7 +23,23 @@ class AllResourcesTest extends TestCase {
         $this->actingAs($u)->get('/admin/security/2fa')->assertOk()->assertSee('Scan QR',false);
         $this->actingAs($u)->get('/admin/api-docs')->assertOk()->assertSee('Swagger',false);
         $this->get('/docs')->assertOk()->assertSee('swagger',false);
-        $this->get('/login')->assertOk()->assertSee('tabler',false);
+
+        // The login page must be styled from our own build, and must not
+        // depend on a CDN: an unreachable CDN must never lock an operator
+        // out of their own admin. Asserting the string "tabler" would only
+        // pass because of the old CDN URL, so assert the real condition.
+        $login = $this->get('/login')->assertOk();
+        $html = $login->getContent();
+        $this->assertMatchesRegularExpression(
+            '#/build/assets/app-[^"]+\.css#',
+            $html,
+            'the login page is not loading a compiled local stylesheet'
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '#(cdn\.jsdelivr\.net|unpkg\.com|cdnjs\.cloudflare\.com)#',
+            $html,
+            'the login page still depends on a CDN'
+        );
     }
     public function test_search_drivers(): void {
         $svc=app(\App\Core\Services\SearchService::class);

@@ -1,56 +1,81 @@
 @extends('site.layout')
-@section('title', $seo['title'] ?? $item->title)
+@section('title', ($seo['title'] ?? $item->title) . ' — ' . setting('general.site_name', 'Lindu CMS'))
+@section('description', $seo['description'] ?? \Illuminate\Support\Str::limit(strip_tags((string) $item->excerpt), 160))
 
 @section('content')
-<div class="wrap">
-    {!! app(\App\Core\Services\SeoService::class)->breadcrumb([
-        ['name' => 'Home', 'url' => route('site.home')],
-        ['name' => 'Services', 'url' => route('site.services')],
-        ['name' => $item->title],
-    ]) !!}
-</div>
+    <div class="border-bottom">
+        <div class="container-xl py-3">
+            <x-site.breadcrumbs :items="[
+                ['label' => 'Home', 'url' => route('site.home')],
+                ['label' => 'Services', 'url' => route('site.services')],
+                ['label' => $item->title],
+            ]" />
+        </div>
+    </div>
 
-<section style="padding-top:24px">
-    <div class="wrap">
-        <div class="grid" style="grid-template-columns:1fr 320px;gap:36px;align-items:start">
-            <div>
-                <h1 class="page-title">{{ $item->icon ? $item->icon.' ' : '' }}{{ $item->title }}</h1>
-                @if($item->image)
-                    <img src="{{ $item->image }}" alt="{{ $item->title }}" style="width:100%;border-radius:var(--lindu-radius);margin-bottom:22px">
-                @endif
-                @if($item->excerpt)
-                    <p style="font-size:1.1rem;color:#475569">{{ $item->excerpt }}</p>
-                @endif
-                @if($item->description)
-                    <div class="prose">{!! $item->description !!}</div>
+    <x-site.hero
+        :title="$item->title"
+        :subtitle="$item->excerpt"
+        :image="$item->image"
+        :cta-url="$item->cta_url"
+        :cta-label="$item->cta_label"
+    />
+
+    <x-site.section>
+        <div class="row g-5">
+            <div class="col-lg-8">
+                @if (! empty($item->description))
+                    <div class="lindu-prose">{!! $item->description !!}</div>
+                @else
+                    <div class="lindu-prose"><p>{{ $item->excerpt }}</p></div>
                 @endif
 
-                @if($item->features)
-                    <h3 style="margin-top:30px">What's included</h3>
-                    <div class="grid g2">
-                        @foreach($item->features as $f)
-                            <div class="card" style="padding:14px 18px">✓ {{ is_array($f) ? ($f['title'] ?? json_encode($f)) : $f }}</div>
+                @if (filled($item->features))
+                    <h2 class="h3 mt-4 mb-3">What's included</h2>
+                    <div class="row g-2">
+                        @foreach ($item->features as $feature)
+                            <div class="col-md-6">
+                                <div class="d-flex gap-2 align-items-start p-2 rounded" style="background:var(--tblr-bg-surface-secondary)">
+                                    <i class="ti ti-check-circle text-success mt-1"></i>
+                                    <span>{{ is_array($feature) ? ($feature['title'] ?? '') : $feature }}</span>
+                                </div>
+                            </div>
                         @endforeach
                     </div>
                 @endif
-
-                @if($item->cta_url)
-                    <p style="margin-top:28px"><a class="btn" href="{{ $item->cta_url }}">{{ $item->cta_label ?: 'Get Started' }}</a></p>
-                @endif
             </div>
 
-            <aside>
-                <div class="card">
-                    <h3>Other services</h3>
-                    <ul style="list-style:none;padding:0;margin:0;display:grid;gap:10px">
-                        @foreach($related as $r)
-                            <li><a href="{{ route('site.service', $r->slug) }}">{{ $r->title }}</a></li>
-                        @endforeach
-                        <li><a href="{{ route('site.contact') }}">Ask about this service →</a></li>
-                    </ul>
+            <aside class="col-lg-4">
+                <div class="card sticky-top" style="lindu-sticky-aside">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">Talk to us about this</h2>
+                        <p class="text-secondary small">
+                            Tell us what you need and we will send a plan within one business day.
+                        </p>
+                        <a href="{{ route('site.contact') }}" class="btn btn-primary w-100 mb-2">
+                            {{ $item->cta_label ?: 'Get a quote' }}
+                        </a>
+
+                        @if ($related->isNotEmpty())
+                            <hr>
+                            <h3 class="h6 text-secondary text-uppercase" style="lindu-micro-label">
+                                Related services
+                            </h3>
+                            <ul class="list-unstyled d-grid gap-2 mb-0">
+                                @foreach ($related as $r)
+                                    <li><a href="{{ route('site.service', $r->slug) }}" class="text-decoration-none">{{ $r->title }}</a></li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
                 </div>
             </aside>
         </div>
-    </div>
-</section>
+    </x-site.section>
+
+    <x-site.cta
+        title="Ready when you are"
+        body="One short message is enough to start."
+        url="{{ route('site.contact') }}"
+    />
 @endsection
