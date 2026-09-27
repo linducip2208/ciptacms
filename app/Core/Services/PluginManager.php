@@ -198,7 +198,13 @@ class PluginManager
 
             Event::listen($event, function (...$args) use ($plugin, $method) {
                 try {
-                    return $plugin->{$method}(...$args);
+                    // The dispatcher passes (event name, payload). Taking the
+                    // last argument covers that and the payload-only shape.
+                    // Spreading both made every hook throw a TypeError that
+                    // the catch below then swallowed, so no plugin hook ran.
+                    $payload = $args ? end($args) : [];
+
+                    return $plugin->{$method}(is_array($payload) ? $payload : []);
                 } catch (\Throwable $e) {
                     // A broken plugin must not take the public site down.
                     report($e);

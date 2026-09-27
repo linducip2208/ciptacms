@@ -189,11 +189,15 @@ class BundledPluginsTest extends TestCase
     }
 
     /**
-     * KNOWN GAP: the manager registers the listener, but firing the event
-     * does not reach the plugin under the test harness. Until that is
-     * resolved, the bundled plugins' hooks must not be advertised as
-     * end-to-end working. This test pins the registration half so the
-     * behaviour cannot silently regress further.
+     * KNOWN GAP: the manager registers the listener and a direct invocation
+     * of the plugin's handler works, but firing webhook.delivered through the
+     * framework dispatcher does not reach it under the test harness. Narrowed
+     * to: a listener registered by ensureBooted() does not fire, while one
+     * registered directly in the same test does, and the dispatcher itself is
+     * proven healthy. Not yet root-caused.
+     *
+     * Until it is, the bundled plugins' hooks must not be advertised as
+     * end-to-end working. The handler behaviour is covered by the tests above.
      */
     public function test_hook_listener_is_registered(): void
     {
