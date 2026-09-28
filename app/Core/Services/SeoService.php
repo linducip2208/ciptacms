@@ -47,6 +47,35 @@ class SeoService
         $site = (string) setting('general.site_name', config('lindu.name', 'Lindu CMS'));
         $sep = (string) setting('seo.separator', ' | ');
 
+        $meta = (array) $meta;
+
+        // A SeoMeta row names its columns meta_title / meta_description, while
+        // this renderer works in title / description. Without the mapping a
+        // per-page override saved in the admin was silently ignored and the
+        // global default was emitted for every page.
+        $aliases = [
+            'title' => ['meta_title', 'title'],
+            'description' => ['meta_description', 'description'],
+            'keywords' => ['meta_keywords', 'keywords'],
+            'canonical' => ['canonical', 'link'],
+            'robots' => ['robots'],
+            'og_title' => ['meta_title', 'og_title'],
+            'og_description' => ['meta_description', 'og_description'],
+            'og_image' => ['og_image', 'meta_image'],
+            'twitter_card' => ['twitter_card'],
+            'schema' => ['schema', 'schema_json'],
+        ];
+
+        $normalised = [];
+        foreach ($aliases as $target => $sources) {
+            foreach ($sources as $source) {
+                if (isset($meta[$source]) && $meta[$source] !== '') {
+                    $normalised[$target] = $meta[$source];
+                    break;
+                }
+            }
+        }
+
         $m = array_merge([
             'title' => $site,
             'description' => setting('seo.meta_description', ''),
@@ -59,7 +88,7 @@ class SeoService
             'og_type' => 'website',
             'twitter_card' => setting('seo.twitter_card', 'summary_large_image'),
             'schema' => null,
-        ], array_filter((array) $meta, fn ($v) => $v !== null && $v !== ''));
+        ], $normalised);
 
         $e = fn ($v) => htmlspecialchars((string) $v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
