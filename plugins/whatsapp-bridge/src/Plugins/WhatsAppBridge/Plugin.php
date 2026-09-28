@@ -69,12 +69,15 @@ class Plugin implements PluginInterface
         return $this->link($value, (string) ($context['message'] ?? ''));
     }
 
+    /**
+     * The core dispatches contact submissions as `cms.contact.message`
+     * (SiteController::notifyNew), so the hook must carry that prefix.
+     * An unprefixed name here can never fire.
+     */
     public function hooks(): array
     {
         return [
-            // Fires when a contact form is submitted, so an operator can opt
-            // into messaging a new lead without writing a module.
-            'contact.message' => 'onContactMessage',
+            'cms.contact.message' => 'onContactMessage',
         ];
     }
 

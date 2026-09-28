@@ -104,6 +104,18 @@ class SeoService
             $h .= $custom."\n";
         }
 
+        // Extension point: plugins may add or change head tags. Runs last so
+        // a plugin can override anything the core emitted, and passes the
+        // per-page context so a filter can act on it (e.g. force noindex on
+        // a specific page) rather than guessing.
+        $h = (string) \App\Core\Services\PluginManager::filters('seo.meta', $h, [
+            'title' => $m['title'] ?? null,
+            'description' => $m['description'] ?? null,
+            'canonical' => $m['canonical'] ?? null,
+            'url' => url()->current(),
+            'noindex' => ($m['robots'] ?? '') === 'noindex,nofollow',
+        ]);
+
         return $h;
     }
 

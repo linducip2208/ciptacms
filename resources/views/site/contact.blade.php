@@ -81,12 +81,20 @@
                                 </p>
                             @endif
                             @if (! empty($contactInfo['contact.whatsapp']))
+                                @php
+                                    // Built in by default; a plugin may replace it
+                                    // (the whatsapp-bridge ships a wa.me filter).
+                                    $waLink = \App\Core\Services\PluginManager::filters('whatsapp.link', $contactInfo['contact.whatsapp']);
+                                @endphp
                                 <p class="mb-2">
                                     <i class="ti ti-brand-whatsapp me-2 text-secondary"></i>
-                                    <a href="https://wa.me/{{ ltrim($contactInfo['contact.whatsapp'], '+') }}"
-                                       target="_blank" rel="noopener" class="text-decoration-none">
+                                    @if ($waLink)
+                                        <a href="{{ $waLink }}" target="_blank" rel="noopener" class="text-decoration-none">
+                                            {{ $contactInfo['contact.whatsapp'] }}
+                                        </a>
+                                    @else
                                         {{ $contactInfo['contact.whatsapp'] }}
-                                    </a>
+                                    @endif
                                 </p>
                             @endif
                             @if (! empty($contactInfo['contact.email']))

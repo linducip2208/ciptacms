@@ -39,11 +39,14 @@ class Plugin implements PluginInterface
         return ['seo.meta'];
     }
 
+    /**
+     * No hooks: the core dispatches no `page.rendered`, so declaring one only
+     * made this plugin look event-driven when it is not. Its real work is the
+     * `seo.meta` filter, which SeoService::render() applies.
+     */
     public function hooks(): array
     {
-        return [
-            'page.rendered' => 'onPageRendered',
-        ];
+        return [];
     }
 
     /**
@@ -78,12 +81,6 @@ class Plugin implements PluginInterface
         return $value.$extra;
     }
 
-    /** Records that the plugin saw a render. Useful while debugging a plugin. */
-    public function onPageRendered(array $payload = []): void
-    {
-        // Intentionally a no-op: the filter above is the plugin's real work.
-        // Kept so the declared hook resolves to a real method.
-    }
 
     public function onInstall(): void
     {
