@@ -198,13 +198,13 @@ class PluginManager
 
             Event::listen($event, function (...$args) use ($plugin, $method) {
                 try {
-                    // The dispatcher passes (event name, payload). Taking the
-                    // last argument covers that and the payload-only shape.
-                    // Spreading both made every hook throw a TypeError that
-                    // the catch below then swallowed, so no plugin hook ran.
-                    $payload = $args ? end($args) : [];
+                    // Laravel hands a listener the payload's values as
+                    // separate positional arguments, not the array. Core
+                    // fires through DomainEvent so the payload arrives as one
+                    // argument; this recovers it either way.
+                    $payload = \App\Core\Support\DomainEvent::payload($args);
 
-                    return $plugin->{$method}(is_array($payload) ? $payload : []);
+                    return $plugin->{$method}($payload);
                 } catch (\Throwable $e) {
                     // A broken plugin must not take the public site down.
                     report($e);

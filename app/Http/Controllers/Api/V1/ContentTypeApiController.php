@@ -252,7 +252,7 @@ class ContentTypeApiController extends ApiController
     {
         try {
             $payload = ['content_type' => $ct->slug, 'record' => $record->toArray()];
-            event('record.'.$event, $payload);
+            \App\Core\Support\DomainEvent::fire('record.'.$event, $payload);
             app(\App\Core\Services\WebhookDispatcher::class)->dispatchEvent('record.'.$event, $payload);
             app(\App\Core\Services\WorkflowEngine::class)->trigger('record.'.$event, [
                 'content_type' => $ct->slug,

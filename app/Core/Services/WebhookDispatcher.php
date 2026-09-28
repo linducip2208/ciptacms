@@ -97,16 +97,19 @@ class WebhookDispatcher
         // webhook-logger plugin, or an operator's own) can observe every
         // attempt without touching this service.
         try {
-            event('webhook.'.($log->status === 'delivered' ? 'delivered' : 'failed'), [
-                'webhook_id' => $hook->id,
-                'name' => $hook->name,
-                'event' => $log->event,
-                'status' => $log->status,
-                'http_status' => $log->response_status,
-                'attempts' => $log->attempts,
-                'error' => $log->error,
-                'url' => $hook->url,
-            ]);
+            \App\Core\Support\DomainEvent::fire(
+                'webhook.'.($log->status === 'delivered' ? 'delivered' : 'failed'),
+                [
+                    'webhook_id' => $hook->id,
+                    'name' => $hook->name,
+                    'event' => $log->event,
+                    'status' => $log->status,
+                    'http_status' => $log->response_status,
+                    'attempts' => $log->attempts,
+                    'error' => $log->error,
+                    'url' => $hook->url,
+                ]
+            );
         } catch (\Throwable $e) {
             report($e);
         }

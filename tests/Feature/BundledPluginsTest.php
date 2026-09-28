@@ -189,19 +189,16 @@ class BundledPluginsTest extends TestCase
     }
 
     /**
-     * KNOWN GAP — plugin event hooks are not yet proven end to end.
+     * The real path, end to end: the dispatcher performs a delivery, which
+     * fires the event, which the plugin's hook receives and records.
      *
-     * Everything around the dispatch is verified: the listener is registered,
-     * the dispatcher performs the delivery, a second listener on the same
-     * event fires, and calling the plugin's handler directly records the
-     * row. The one link that does not hold is the registered listener not
-     * running when the real dispatcher fires the event. Not yet root-caused.
-     *
-     * These assertions pin the working parts so the gap cannot be mistaken
-     * for "the plugin is broken", and the handler tests above cover the
-     * plugin's own code.
+     * This was the missing link. Asserting the handler in isolation proved
+     * the plugin's own code worked but said nothing about whether the event
+     * ever reached it — and for a long time it did not, because Laravel hands
+     * a listener the payload's values as separate positional arguments, so
+     * the hook received a bare scalar instead of the array.
      */
-    public function test_the_dispatcher_delivers_but_the_hook_is_unproven(): void
+    public function test_a_real_delivery_reaches_the_plugin(): void
     {
         $this->activate('webhook-logger');
         Http::fake(['*' => Http::response('ok', 200)]);
@@ -212,15 +209,40 @@ class BundledPluginsTest extends TestCase
             'is_active' => true, 'timeout' => 5,
         ]);
 
-        $result = app(WebhookDispatcher::class)->send($hook, ['order_id' => 7]);
+        $result = app(WebhookDispatcher::class)->send($hook, ['order_id' => 7, 'event' => 'order.paid', 'name' => 'Partner']);
 
-        // The delivery itself is real.
-        $this->assertSame('delivered', $result->status);
-        $this->assertSame(200, $result->response_status);
+        $this->assertSame('delivered', $result->status, 'the delivery itself failed');
 
-        // A listener is registered for the event the dispatcher fires.
-        $this->assertTrue(
-            \Illuminate\Support\Facades\Event::hasListeners('webhook.delivered')
+        $this->assertSame(
+            1,
+            ActivityLog::where('channel', 'webhook')->where('action', 'success')->count(),
+            'the dispatcher fired webhook.delivered but the plugin never ran'
+        );
+
+        // The hook received a usable payload, not a positional fragment.
+        $log = ActivityLog::where('channel', 'webhook')->firstOrFail();
+        $this->assertStringContainsString('Partner', $log->description);
+        $this->assertSame('order.paid', $log->properties['event']);
+        $this->assertSame((string) $hook->id, (string) $log->subject_id);
+    }
+
+    public function test_a_real_failed_delivery_reaches_the_plugin(): void
+    {
+        $this->activate('webhook-logger');
+        Http::fake(['*' => Http::response('boom', 500)]);
+
+        $hook = Webhook::create([
+            'name' => 'Partner', 'event' => 'order.paid',
+            'url' => 'https://partner.test/hook', 'secret' => 's3cret',
+            'is_active' => true, 'timeout' => 5,
+        ]);
+
+        app(WebhookDispatcher::class)->send($hook, ['order_id' => 7, 'event' => 'order.paid', 'name' => 'Partner']);
+
+        $this->assertSame(
+            1,
+            ActivityLog::where('channel', 'webhook')->where('action', 'failed')->count(),
+            'a failed delivery never reached the plugin'
         );
     }
 

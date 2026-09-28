@@ -70,7 +70,7 @@ class CommentService
         }
 
         try {
-            event('comment.created', ['comment_id' => $comment->id, 'post_id' => $post->id, 'status' => $status]);
+            \App\Core\Support\DomainEvent::fire('comment.created', ['comment_id' => $comment->id, 'post_id' => $post->id, 'status' => $status]);
             app(WebhookDispatcher::class)->dispatchEvent('comment.created', [
                 'post_id' => $post->id, 'comment_id' => $comment->id, 'status' => $status,
             ]);

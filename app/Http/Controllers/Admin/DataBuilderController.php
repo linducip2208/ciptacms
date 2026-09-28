@@ -500,7 +500,7 @@ class DataBuilderController extends AdminController
         $this->audit($action.'_record', $record, $r);
 
         try {
-            event('record.'.$action, ['type' => $ct->slug, 'record' => $record->toArray()]);
+            \App\Core\Support\DomainEvent::fire('record.'.$action, ['type' => $ct->slug, 'record' => $record->toArray()]);
             app(\App\Core\Services\WebhookDispatcher::class)->dispatchEvent('record.'.$action, [
                 'content_type' => $ct->slug,
                 'record' => $record->toArray(),

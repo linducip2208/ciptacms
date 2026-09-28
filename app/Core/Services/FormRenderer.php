@@ -304,7 +304,7 @@ class FormRenderer
                 'New submission: '.$form->title,
                 'A new submission was received for "'.$form->title.'".'
             );
-            event('form.submitted', ['form' => $form->slug, 'submission_id' => $submission->id, 'data' => $data]);
+            \App\Core\Support\DomainEvent::fire('form.submitted', ['form' => $form->slug, 'submission_id' => $submission->id, 'data' => $data]);
             app(WebhookDispatcher::class)->dispatchEvent('form.submitted', [
                 'form' => $form->slug,
                 'submission_id' => $submission->id,

@@ -138,16 +138,15 @@ class PluginFilterWiringTest extends TestCase
             }
             $src = (string) file_get_contents($file->getPathname());
 
-            // event('name', ...) and event('prefix'.$var, ...)
-            if (preg_match_all("/event\(\s*'([a-z][a-z0-9_.]*)'/i", $src, $m)) {
+            // event('name', ...), fire('name', ...) and the DomainEvent wrapper.
+            if (preg_match_all("/(?:event|DomainEvent::fire)\(\s*'([a-z][a-z0-9_.]*)'/i", $src, $m)) {
                 foreach ($m[1] as $n) {
-                    $names[] = $n;
+                    $names[] = rtrim($n, '.');
                 }
             }
-            // event('prefix' . $x, ...) — resolve to the prefix plus known tails
-            // event('prefix.' . ($ok ? 'a' : 'b'), ...) yields two names.
+            // fire('prefix.' . ($ok ? 'a' : 'b'), ...) yields two names.
             if (preg_match(
-                "/event\(\s*'([a-z][a-z0-9_]*)\.'\s*\.\s*\(.*?\?\s*'([a-z]+)'\s*:\s*'([a-z]+)'/s",
+                "/(?:event|DomainEvent::fire)\(\s*'([a-z][a-z0-9_]*)\.'\s*\.\s*\(.*?\?\s*'([a-z]+)'\s*:\s*'([a-z]+)'/s",
                 $src,
                 $m
             )) {
@@ -155,7 +154,7 @@ class PluginFilterWiringTest extends TestCase
                 $names[] = $m[1].'.'.$m[3];
             }
 
-            if (preg_match("/event\(\s*'([a-z][a-z0-9_.]*)'\s*\.\s*\\\$event/i", $src, $m)) {
+            if (preg_match("/(?:event|DomainEvent::fire)\(\s*'([a-z][a-z0-9_.]*)'\s*\.\s*\\\$event/i", $src, $m)) {
                 $names[] = $m[1].'.contact.message';
                 $names[] = $m[1].'.contact.message';
                 $names[] = $m[1].'.job.application';

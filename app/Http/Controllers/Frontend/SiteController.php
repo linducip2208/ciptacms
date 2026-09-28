@@ -462,7 +462,7 @@ class SiteController extends Controller
     protected function notifyNew(string $event, array $payload): void
     {
         try {
-            event('cms.'.$event, $payload);
+            \App\Core\Support\DomainEvent::fire('cms.'.$event, $payload);
             app(\App\Core\Services\WebhookDispatcher::class)->dispatchEvent($event, $payload);
             app(\App\Core\Services\WorkflowEngine::class)->trigger($event, $payload);
         } catch (\Throwable $e) {
